@@ -682,7 +682,7 @@ try:
                                    ace_gs_val, metodo_val, ruta, idEc, idM))
 
             for i in range(len(lluviasActivas)):
-                insert = "INSERT INTO Lluvia_activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
+                insert = "INSERT INTO Lluvia_Activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
                 cursor.execute(insert, (distMinRadTray[i], lluviasActivas[i], int(yearInforme), idInf))
 
             for i in range(len(trayecRegresionEst1)):
