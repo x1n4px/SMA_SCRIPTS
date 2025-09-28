@@ -10,6 +10,8 @@ from mysql.connector import Error
 from datetime import datetime, time
 import os
 from pathlib import Path
+import subprocess
+import sys
 
 def conectar_mysql():
     """
@@ -306,6 +308,253 @@ def mostrar_menu():
     print("3. Salir")
     print("=" * 50)
 
+def procesar_todos_los_informes(directorio_path):
+    """
+    Procesa secuencialmente todos los tipos de informes en el directorio:
+    1. Primero Informe-Z (para crear la referencia del meteoro)
+    2. Luego Informe-Radiante 
+    3. Finalmente Informe-fotometria
+    
+    Args:
+        directorio_path: Ruta al directorio a procesar
+    
+    Returns:
+        Dict con contadores de cada tipo de informe procesado
+    """
+    resultados = {
+        'informes_z': {'procesados': 0, 'errores': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0}
+    }
+    
+    # Primero procesamos los Informes-Z
+    print(f"\n   📄 Procesando Informes-Z...")
+    z_proc, z_err = procesar_informes_z(directorio_path)
+    resultados['informes_z']['procesados'] = z_proc
+    resultados['informes_z']['errores'] = z_err
+    
+    # Luego procesamos los Informes-Radiante
+    print(f"\n   🌟 Procesando Informes-Radiante...")
+    rad_proc, rad_err = procesar_informes_radiante(directorio_path)
+    resultados['informes_rad']['procesados'] = rad_proc
+    resultados['informes_rad']['errores'] = rad_err
+    
+    # Finalmente procesamos los Informes-fotometria
+    print(f"\n   📷 Procesando Informes-fotometria...")
+    fot_proc, fot_err = procesar_informes_fotometria(directorio_path)
+    resultados['informes_fot']['procesados'] = fot_proc
+    resultados['informes_fot']['errores'] = fot_err
+    
+    return resultados
+
+def procesar_informes_z(directorio_path):
+    """
+    Procesa los archivos Informe-Z en los subdirectorios Trayectoria-*
+    
+    Args:
+        directorio_path: Ruta al directorio a procesar
+    
+    Returns:
+        Tupla (procesados, errores) con contadores
+    """
+    procesados = 0
+    errores = 0
+    informes_encontrados = []
+    
+    try:
+        ruta = Path(directorio_path)
+        
+        # Buscar todos los subdirectorios que empiecen con "Trayectoria-"
+        subdirectorios_trayectoria = [d for d in ruta.iterdir() 
+                                     if d.is_dir() and d.name.startswith("Trayectoria-")]
+        
+        if not subdirectorios_trayectoria:
+            print(f"   ⚠️  No se encontraron subdirectorios 'Trayectoria-*' en {directorio_path}")
+            return 0, 0
+        
+        for subdir_trayectoria in subdirectorios_trayectoria:
+            # Buscar archivos que empiecen con "Informe-Z" y no terminen en ".kml"
+            for archivo in subdir_trayectoria.iterdir():
+                if archivo.is_file() and archivo.name.startswith("Informe-Z") and not archivo.name.endswith(".kml"):
+                    informes_encontrados.append(archivo)
+        
+        if not informes_encontrados:
+            print(f"   ⚠️  No se encontraron archivos Informe-Z válidos en {directorio_path}")
+            return 0, 0
+        
+        print(f"   📄 Encontrados {len(informes_encontrados)} archivo(s) Informe-Z")
+        
+        # Procesar cada informe encontrado
+        for informe_path in informes_encontrados:
+            try:
+                print(f"      • Procesando: {informe_path.parent.name}/{informe_path.name}")
+                
+                # Obtener la ruta del script CargaInformesZ.py
+                script_dir = Path(__file__).parent
+                carga_script = script_dir / "CargaInformesZ.py"
+                
+                # Ejecutar CargaInformesZ.py con el directorio padre del informe como argumento
+                resultado = subprocess.run(
+                    [sys.executable, str(carga_script), str(informe_path.parent)],
+                    capture_output=True,
+                    text=True,
+                    timeout=30  # Timeout de 30 segundos por informe
+                )
+                
+                if resultado.returncode == 0:
+                    procesados += 1
+                    print(f"        ✅ Procesado correctamente")
+                    if resultado.stdout:
+                        print(f"           Salida: {resultado.stdout[:100]}")
+                else:
+                    errores += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
+                    print(f"        ❌ Error al procesar (código {resultado.returncode}): {error_msg[:300]}")
+                    
+            except subprocess.TimeoutExpired:
+                errores += 1
+                print(f"        ❌ Tiempo de espera agotado procesando {informe_path.name}")
+            except Exception as e:
+                errores += 1
+                print(f"        ❌ Error inesperado: {e}")
+        
+    except Exception as e:
+        print(f"   ❌ Error al procesar directorio {directorio_path}: {e}")
+        return 0, 1
+    
+    return procesados, errores
+
+def procesar_informes_radiante(directorio_path):
+    """
+    Procesa los archivos Informe-Radiante que terminan en .inf
+    
+    Args:
+        directorio_path: Ruta al directorio a procesar
+    
+    Returns:
+        Tupla (procesados, errores) con contadores
+    """
+    procesados = 0
+    errores = 0
+    informes_encontrados = []
+    
+    try:
+        ruta = Path(directorio_path)
+        
+        # Buscar archivos que empiecen con "Informe-Radiante" y terminen en ".inf"
+        for archivo in ruta.rglob("Informe-Radiante*.inf"):
+            informes_encontrados.append(archivo)
+        
+        if not informes_encontrados:
+            print(f"      ⚠️  No se encontraron archivos Informe-Radiante en {directorio_path}")
+            return 0, 0
+        
+        print(f"      🌟 Encontrados {len(informes_encontrados)} archivo(s) Informe-Radiante")
+        
+        # Procesar cada informe encontrado
+        for informe_path in informes_encontrados:
+            try:
+                print(f"         • Procesando: {informe_path.name}")
+                
+                # Obtener la ruta del script CargaInformesRad.py
+                script_dir = Path(__file__).parent
+                carga_script = script_dir / "CargaInformesRad.py"
+                
+                # Ejecutar CargaInformesRad.py con el directorio del informe como argumento
+                resultado = subprocess.run(
+                    [sys.executable, str(carga_script), str(informe_path.parent)],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if resultado.returncode == 0:
+                    procesados += 1
+                    print(f"           ✅ Procesado correctamente")
+                else:
+                    errores += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
+                    print(f"           ❌ Error al procesar (código {resultado.returncode}): {error_msg[:200]}")
+                    
+            except subprocess.TimeoutExpired:
+                errores += 1
+                print(f"           ❌ Tiempo de espera agotado procesando {informe_path.name}")
+            except Exception as e:
+                errores += 1
+                print(f"           ❌ Error inesperado: {e}")
+        
+    except Exception as e:
+        print(f"      ❌ Error al procesar directorio {directorio_path}: {e}")
+        return 0, 1
+    
+    return procesados, errores
+
+def procesar_informes_fotometria(directorio_path):
+    """
+    Procesa los archivos Informe-fotometria
+    
+    Args:
+        directorio_path: Ruta al directorio a procesar
+    
+    Returns:
+        Tupla (procesados, errores) con contadores
+    """
+    procesados = 0
+    errores = 0
+    informes_encontrados = []
+    
+    try:
+        ruta = Path(directorio_path)
+        
+        # Buscar archivos que empiecen con "Informe-fotometria"
+        for archivo in ruta.rglob("Informe-fotometria*"):
+            if archivo.is_file():
+                informes_encontrados.append(archivo)
+        
+        if not informes_encontrados:
+            print(f"      ⚠️  No se encontraron archivos Informe-fotometria en {directorio_path}")
+            return 0, 0
+        
+        print(f"      📷 Encontrados {len(informes_encontrados)} archivo(s) Informe-fotometria")
+        
+        # Procesar cada informe encontrado
+        for informe_path in informes_encontrados:
+            try:
+                print(f"         • Procesando: {informe_path.name}")
+                
+                # Obtener la ruta del script CargaInformesFot_MySQL.py
+                script_dir = Path(__file__).parent
+                carga_script = script_dir / "CargaInformesFot_MySQL.py"
+                
+                # Ejecutar CargaInformesFot_MySQL.py con el directorio del informe como argumento
+                resultado = subprocess.run(
+                    [sys.executable, str(carga_script), str(informe_path.parent)],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if resultado.returncode == 0:
+                    procesados += 1
+                    print(f"           ✅ Procesado correctamente")
+                else:
+                    errores += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
+                    print(f"           ❌ Error al procesar (código {resultado.returncode}): {error_msg[:200]}")
+                    
+            except subprocess.TimeoutExpired:
+                errores += 1
+                print(f"           ❌ Tiempo de espera agotado procesando {informe_path.name}")
+            except Exception as e:
+                errores += 1
+                print(f"           ❌ Error inesperado: {e}")
+        
+    except Exception as e:
+        print(f"      ❌ Error al procesar directorio {directorio_path}: {e}")
+        return 0, 1
+    
+    return procesados, errores
+
 def seleccion_manual(directorios_pendientes):
     """
     Permite al usuario seleccionar manualmente qué directorios procesar
@@ -365,9 +614,56 @@ def seleccion_manual(directorios_pendientes):
         print(f"   • {directorio['nombre']} ({directorio['hora_formato']})")
         directorios_a_procesar.append(directorio)
     
-    # TODO: Aquí iría la lógica de procesamiento
+    # Procesar los directorios seleccionados
     print(f"\n🔄 Procesando {len(directorios_a_procesar)} directorio(s)...")
-    print("   (Funcionalidad de procesamiento pendiente de implementar)")
+    print("-" * 50)
+    
+    # Contadores globales
+    totales = {
+        'informes_z': {'procesados': 0, 'errores': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0}
+    }
+    
+    for directorio in directorios_a_procesar:
+        print(f"\n📂 Procesando directorio: {directorio['fecha_formato']} {directorio['hora_formato']}")
+        print(f"   Ruta: {directorio['ruta']}")
+        
+        resultados = procesar_todos_los_informes(directorio['ruta'])
+        
+        # Acumular resultados
+        for tipo in totales:
+            totales[tipo]['procesados'] += resultados[tipo]['procesados']
+            totales[tipo]['errores'] += resultados[tipo]['errores']
+    
+    # Mostrar resumen detallado
+    print("\n" + "=" * 50)
+    print("RESUMEN DEL PROCESAMIENTO")
+    print("=" * 50)
+    
+    total_procesados = sum(t['procesados'] for t in totales.values())
+    total_errores = sum(t['errores'] for t in totales.values())
+    
+    print(f"\n📄 Informes-Z:")
+    print(f"   ✅ Procesados: {totales['informes_z']['procesados']}")
+    if totales['informes_z']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_z']['errores']}")
+    
+    print(f"\n🌟 Informes-Radiante:")
+    print(f"   ✅ Procesados: {totales['informes_rad']['procesados']}")
+    if totales['informes_rad']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_rad']['errores']}")
+    
+    print(f"\n📷 Informes-fotometria:")
+    print(f"   ✅ Procesados: {totales['informes_fot']['procesados']}")
+    if totales['informes_fot']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_fot']['errores']}")
+    
+    print(f"\n📊 TOTALES:")
+    print(f"   ✅ Total procesados: {total_procesados}")
+    if total_errores > 0:
+        print(f"   ❌ Total con errores: {total_errores}")
+    print(f"   📂 Directorios procesados: {len(directorios_a_procesar)}")
 
 def procesar_todos(directorios_pendientes):
     """
@@ -377,12 +673,67 @@ def procesar_todos(directorios_pendientes):
     print("-" * 50)
     print(f"Total de directorios a procesar: {len(directorios_pendientes)}")
     
-    for i, directorio in enumerate(directorios_pendientes, 1):
-        print(f"   {i:3}. Procesando: {directorio['nombre']} ({directorio['hora_formato']})")
+    # Confirmación antes de procesar todos
+    print(f"\n⚠️  Esto procesará {len(directorios_pendientes)} directorio(s).")
+    confirmacion = input("¿Deseas continuar? (s/n): ").strip().lower()
     
-    # TODO: Aquí iría la lógica de procesamiento
-    print(f"\n✅ Procesamiento completado para {len(directorios_pendientes)} directorio(s).")
-    print("   (Funcionalidad de procesamiento pendiente de implementar)")
+    if confirmacion != 's':
+        print("\n❌ Procesamiento cancelado por el usuario.")
+        return
+    
+    print("\n" + "=" * 50)
+    
+    # Contadores globales
+    totales = {
+        'informes_z': {'procesados': 0, 'errores': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0}
+    }
+    
+    for i, directorio in enumerate(directorios_pendientes, 1):
+        print(f"\n📂 [{i}/{len(directorios_pendientes)}] Procesando: {directorio['fecha_formato']} {directorio['hora_formato']}")
+        print(f"   Ruta: {directorio['ruta']}")
+        
+        resultados = procesar_todos_los_informes(directorio['ruta'])
+        
+        # Acumular resultados
+        for tipo in totales:
+            totales[tipo]['procesados'] += resultados[tipo]['procesados']
+            totales[tipo]['errores'] += resultados[tipo]['errores']
+        
+        # Mostrar progreso
+        porcentaje = (i / len(directorios_pendientes)) * 100
+        print(f"\n   Progreso total: {porcentaje:.1f}%")
+    
+    # Mostrar resumen detallado
+    print("\n" + "=" * 50)
+    print("RESUMEN DEL PROCESAMIENTO")
+    print("=" * 50)
+    
+    total_procesados = sum(t['procesados'] for t in totales.values())
+    total_errores = sum(t['errores'] for t in totales.values())
+    
+    print(f"\n📄 Informes-Z:")
+    print(f"   ✅ Procesados: {totales['informes_z']['procesados']}")
+    if totales['informes_z']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_z']['errores']}")
+    
+    print(f"\n🌟 Informes-Radiante:")
+    print(f"   ✅ Procesados: {totales['informes_rad']['procesados']}")
+    if totales['informes_rad']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_rad']['errores']}")
+    
+    print(f"\n📷 Informes-fotometria:")
+    print(f"   ✅ Procesados: {totales['informes_fot']['procesados']}")
+    if totales['informes_fot']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_fot']['errores']}")
+    
+    print(f"\n📊 TOTALES:")
+    print(f"   ✅ Total procesados: {total_procesados}")
+    if total_errores > 0:
+        print(f"   ❌ Total con errores: {total_errores}")
+    print(f"   📂 Directorios procesados: {len(directorios_pendientes)}")
+    print(f"\n✅ Procesamiento completado.")
 
 def main():
     """

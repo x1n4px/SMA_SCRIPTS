@@ -8,10 +8,13 @@ import mysql.connector
 
 # Configuración de conexión MySQL
 server = 'localhost'  # o la IP del servidor MySQL
-database = 'database'
-username = 'usuario' 
-password = 'password'
+database = 'astro'  # Base de datos para meteoros
+username = 'in4p'   # Usuario MySQL
+password = '0000'   # Contraseña MySQL
 port = 3306  # Puerto por defecto de MySQL
+
+cnxn = None
+cursor = None
 
 try:
     # Conexión a MySQL
@@ -21,7 +24,8 @@ try:
         database=database,
         user=username,
         password=password,
-        connection_timeout=15
+        connection_timeout=15,
+        autocommit=True
     )
     cursor = cnxn.cursor()
     ##########Conexion a la BD##############
@@ -276,8 +280,22 @@ try:
                     elif entrada.name[:18] == "Informe-fotometria":
                         procesaInforme(directorio, entrada.name)
 
-    cursor.close()
-    cnxn.close()
+    if cursor:
+        cursor.close()
+    if cnxn:
+        cnxn.close()
     
 except mysql.connector.Error as e:
     print('Error de conexión MySQL:', e)
+    sys.exit(1)
+except Exception as e:
+    print('Error general:', e)
+    sys.exit(1)
+finally:
+    try:
+        if cnxn and cnxn.is_connected():
+            if cursor:
+                cursor.close()
+            cnxn.close()
+    except:
+        pass

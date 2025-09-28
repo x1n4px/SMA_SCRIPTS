@@ -1,0 +1,22 @@
+Informe del meteoro Datos-Z-20250903032142-14 captado desde observatorio 14:
+
+Comando para repetir:
+radiante.pl 2025-09-03T03:21:42.1930 14 423 572 429.65153 599.37245
+
+Lluvias activa a la fecha:
+Antihelio
+Aurígidas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |  353.00 |   -1.67 |  185.739419 |  19.784731 |    21.988
+  AUR |   94.00 |   39.00 |   94.585240 |  37.474006 |     1.594
+
+Se ha asociado a las Aurígidas con velocidad (catálogo IMO) 66 Km/s.
+
+
+Trayectorias estimadas para un tiempo de 0.199999809265137 segundos:
+ v    | Inicio                                       | Final                                        | Recor. 
+      | Lon          |  Lat        |   Alt  | dist.  | Lon          |  Lat        |  Alt   | dist.  | 
+============================================================================================================

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+  <name>Informe-Radiante-20250913085249.4742-12.kml</name>
+  <open>1</open>
+  <Style id="sn_ylw-pushpin">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+  <Style id="sn_ylw-pushpin0">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+	 <Style id="sn_ylw-pushpin">
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>2</width>
+		</LineStyle>
+	</Style>
+  <Placemark>
+    <name>I27.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.658467768691,31.3380607248185,91070</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F27.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.536746814164,31.6230641699132,35850</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T27.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-115.658467768691,31.3380607248185,91070 -115.536746814164,31.6230641699132,35850 			</coordinates>
+		</LineString>
+	</Placemark>
+  <Placemark>
+    <name>I30.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.679774824512,31.3701332284489,100890</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F30.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.544791748888,31.6869404457372,39560</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T30.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-115.679774824512,31.3701332284489,100890 -115.544791748888,31.6869404457372,39560 			</coordinates>
+		</LineString>
+	</Placemark>
+  <Placemark>
+    <name>I33.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.701031671833,31.4021048490742,110710</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F33.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-115.55283832472,31.7507414228187,43270</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T33.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-115.701031671833,31.4021048490742,110710 -115.55283832472,31.7507414228187,43270 			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>

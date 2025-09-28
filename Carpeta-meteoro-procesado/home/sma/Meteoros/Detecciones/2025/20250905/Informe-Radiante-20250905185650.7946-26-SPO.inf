@@ -1,0 +1,18 @@
+Informe del meteoro Datos-Z-20250905185650-26 captado desde observatorio 26:
+
+Comando para repetir:
+radiante.pl 2025-09-05T18:56:50.7946 26 306 277 280.41163 260.22224
+
+Lluvias activa a la fecha:
+Antihelio
+Aurígidas
+Épsilon-perseidas de septiembre
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |  355.00 |   -1.00 |  152.205809 |  27.634691 |    34.441
+  AUR |   96.00 |   39.00 |  138.389079 |  14.306120 |    44.627
+  SPE |   43.00 |   40.00 |  126.019818 |   0.091297 |    84.599
+
+No asociado a ninguna lluvia.

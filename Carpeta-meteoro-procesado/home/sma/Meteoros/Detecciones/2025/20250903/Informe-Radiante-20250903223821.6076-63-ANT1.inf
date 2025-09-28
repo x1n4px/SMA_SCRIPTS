@@ -1,0 +1,37 @@
+Informe del meteoro Datos-Z-20250903223821-63 captado desde observatorio 63:
+
+Comando para repetir:
+radiante.pl 2025-09-03T22:38:21.6076 63 1110 459 1137.2693 476.81404
+
+Lluvias activa a la fecha:
+Antihelio
+Aurígidas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |  353.00 |   -1.67 |  353.926745 |   0.814267 |     2.648
+  AUR |   94.00 |   39.00 |  278.927136 |  20.026442 |    59.207
+
+Se ha asociado a las Antihelio con velocidad (catálogo IMO) 30 Km/s.
+
+
+Trayectorias estimadas para un tiempo de 0.600000143051147 segundos:
+ v    | Inicio                                       | Final                                        | Recor. 
+      | Lon          |  Lat        |   Alt  | dist.  | Lon          |  Lat        |  Alt   | dist.  | 
+============================================================================================================
+ 27.0 | -02:26:10.93 | 39:58:05.42 |  69.39 | 190.01 | -02:32:24.22 | 40:02:37.34 |  58.87 | 195.81 | 16.20
+ 30.0 | -02:39:39.49 | 39:59:20.23 |  77.37 | 211.13 | -02:46:36.44 | 40:04:21.35 |  65.71 | 217.57 | 18.00
+ 33.0 | -02:53:06.50 | 40:00:33.29 |  85.41 | 232.24 | -03:00:47.56 | 40:06:03.40 |  72.62 | 239.32 | 19.80
+
+Distancia angular recorrida por el meteoro (radianes / grados) 0.078448  / 4.494768
+Velocidad angular medida del meteoro (grad/sec):  7.491
+
+Velocidades angulares del meteoro previstas (grad/seg):
+(1) = Desde el radiante oficial de la lluvia
+(2) = Desde el radiante aparente
+  v  |  (1)   |  (2) 
+=======================
+27.0 |  7.268 |  7.267
+30.0 |  7.243 |  7.241
+33.0 |  7.217 |  7.216

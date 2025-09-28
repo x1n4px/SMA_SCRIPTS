@@ -9,10 +9,13 @@ import mysql.connector
 from mysql.connector import Error
 
 server = 'localhost'  # o tu servidor MySQL
-database = 'database'
-username = 'usuario' 
-password = 'password'
+database = 'astro'  # Base de datos para meteoros
+username = 'in4p'   # Usuario MySQL
+password = '0000'   # Contraseña MySQL
 port = 3306  # puerto por defecto de MySQL
+
+cnxn = None
+cursor = None
 
 try:
     cnxn = mysql.connector.connect(
@@ -679,7 +682,7 @@ try:
                                    ace_gs_val, metodo_val, ruta, idEc, idM))
 
             for i in range(len(lluviasActivas)):
-                insert = "INSERT INTO Lluvia_Activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
+                insert = "INSERT INTO Lluvia_activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
                 cursor.execute(insert, (distMinRadTray[i], lluviasActivas[i], int(yearInforme), idInf))
 
             for i in range(len(trayecRegresionEst1)):
@@ -758,14 +761,22 @@ try:
                     elif entrada.name[:9] == "Informe-Z" and entrada.name[-3:] != "kml":
                         procesaInforme(directorio, entrada.name)
 
-    cursor.close()
-    cnxn.close()
+    if cursor:
+        cursor.close()
+    if cnxn:
+        cnxn.close()
 
 except mysql.connector.Error as e:
     print('Error de conexión MySQL:', e)
+    sys.exit(1)  # Salir con código de error
 except Exception as e:
     print('Error general:', e)
+    sys.exit(1)  # Salir con código de error
 finally:
-    if cnxn.is_connected():
-        cursor.close()
-        cnxn.close()
+    try:
+        if cnxn and cnxn.is_connected():
+            if cursor:
+                cursor.close()
+            cnxn.close()
+    except:
+        pass

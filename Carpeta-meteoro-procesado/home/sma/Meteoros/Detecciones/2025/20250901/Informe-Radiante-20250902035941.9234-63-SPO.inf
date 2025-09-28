@@ -1,0 +1,16 @@
+Informe del meteoro Datos-Z-20250902035941-63 captado desde observatorio 63:
+
+Comando para repetir:
+radiante.pl 2025-09-02T03:59:41.9234 63 540.96209 481 537.27976 486.62039
+
+Lluvias activa a la fecha:
+Antihelio
+Aurígidas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |  352.00 |   -2.00 |  184.490835 |  14.927702 |    17.862
+  AUR |   93.00 |   39.00 |   91.148329 |  45.302479 |     6.450
+
+No asociado a ninguna lluvia.

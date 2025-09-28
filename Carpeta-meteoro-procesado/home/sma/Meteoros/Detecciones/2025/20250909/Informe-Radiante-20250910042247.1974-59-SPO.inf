@@ -1,0 +1,18 @@
+Informe del meteoro Datos-Z-20250910042247-59 captado desde observatorio 59:
+
+Comando para repetir:
+radiante.pl 2025-09-10T04:22:47.1974 59 451 480 436.79347 445.77559
+
+Lluvias activa a la fecha:
+Antihelio
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |    0.00 |    1.00 |  341.116071 |  47.135024 |    48.978
+  SPE |   48.00 |   40.00 |   51.847395 |  45.410639 |     6.103
+  DSX |  135.00 |    0.00 |  296.810628 |  15.829200 |    23.935
+
+No asociado a ninguna lluvia.

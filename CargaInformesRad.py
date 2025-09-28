@@ -8,10 +8,13 @@ import mysql.connector
 from mysql.connector import Error
 
 server = 'localhost'  # o tu servidor MySQL
-database = 'database'
-username = 'usuario' 
-password = 'password'
+database = 'astro'  # Base de datos para meteoros
+username = 'in4p'   # Usuario MySQL
+password = '0000'   # Contraseña MySQL
 port = 3306  # puerto por defecto de MySQL
+
+cnxn = None
+cursor = None
 
 try:
     cnxn = mysql.connector.connect(
@@ -290,14 +293,22 @@ try:
                     elif entrada.name[:16] == "Informe-Radiante" and entrada.name[-3:] == "inf":
                         procesaInforme(directorio, entrada.name)
 
+    if cursor:
         cursor.close()
+    if cnxn:
         cnxn.close()
 
 except mysql.connector.Error as e:
     print('Error de conexión MySQL:', e)
+    sys.exit(1)
 except Exception as e:
     print('Error general:', e)
+    sys.exit(1)
 finally:
-    if cnxn.is_connected():
-        cursor.close()
-        cnxn.close()
+    try:
+        if cnxn and cnxn.is_connected():
+            if cursor:
+                cursor.close()
+            cnxn.close()
+    except:
+        pass

@@ -1,0 +1,18 @@
+Informe del meteoro Datos-Z-20250912042126-44 captado desde observatorio 44:
+
+Comando para repetir:
+radiante.pl 2025-09-12T04:21:26.7197 44 257.90448 192.68891 258.98118 181.92187
+
+Lluvias activa a la fecha:
+Antihelio
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |    2.00 |    1.40 |  296.776260 |  31.853708 |    68.361
+  SPE |   50.00 |   40.00 |   90.250710 |  61.294439 |    32.370
+  DSX |  137.00 |    0.00 |  291.104716 |   5.209378 |    26.379
+
+No asociado a ninguna lluvia.

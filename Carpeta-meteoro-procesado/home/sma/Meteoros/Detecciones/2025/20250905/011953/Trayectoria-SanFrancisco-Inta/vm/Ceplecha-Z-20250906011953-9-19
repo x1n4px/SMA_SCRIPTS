@@ -1,0 +1,15 @@
+6 : Número del observatorio
+-0.109175920486 : Longitud geográfica del observatorio en radianes
+0.657686398352815 : Latitud geocéntrica del observatorio en radianes
+6370.513892696 : Radio geocéntrico (más altura) del observatorio
+2025-09-06T01:19:53.9279 : Fecha/hora del punto medio de la trayectoria
+5.9123630146542 : Ascención recta del radiante en radianes
+0.392971808172038 : Declinación del radiante en radianes
+0.000103596643822388 : Error ascención recta radiante
+0.000104078178204643 : Error declinación radiante
+73.7889909867508 : Altura inicio trayectoria estación 1
+63.9521601195829 : Altura final trayectoria estación 1
+-0.0934668276880296 : Longitud geográfica punto medio trayectoria estación 1 en radianes
+0.661193006154151 : Latitud geocéntrica punto medio trayectoria estación 1 en radianes
+21.5099748651335 : Velocidad media
+0.414638135899595 : Error velocidad

@@ -1,0 +1,22 @@
+Informe del meteoro Datos-Z-20250906000025-76 captado desde observatorio 76:
+
+Comando para repetir:
+radiante.pl 2025-09-06T00:00:26.2488 76 587.97704 323.92908 579.32551 332.58061
+
+Lluvias activa a la fecha:
+Antihelio
+Épsilon-perseidas de septiembre
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |  284.00 |   -0.60 |  124.204634 |  30.908516 |    35.853
+  SPE |   44.00 |   40.00 |   42.700595 |  42.923196 |     3.081
+
+Se ha asociado a las Épsilon-perseidas de septiembre con velocidad (catálogo IMO) 64 Km/s.
+
+
+Trayectorias estimadas para un tiempo de 0.299999952316284 segundos:
+ v    | Inicio                                       | Final                                        | Recor. 
+      | Lon          |  Lat        |   Alt  | dist.  | Lon          |  Lat        |  Alt   | dist.  | 
+============================================================================================================
