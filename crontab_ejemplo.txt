@@ -1,0 +1,47 @@
+# Configuración de CRONTAB para procesamiento automático de meteoros
+# ====================================================================
+#
+# INSTALACIÓN:
+# -------------
+# 1. Edita tu crontab con: crontab -e
+# 2. Copia y pega la línea correspondiente de abajo
+# 3. Ajusta la ruta del script si es necesario
+#
+# FORMATO CRON:
+# -------------
+# * * * * * comando
+# │ │ │ │ │
+# │ │ │ │ └─── día de la semana (0-7, donde 0 y 7 son domingo)
+# │ │ │ └───── mes (1-12)
+# │ │ └─────── día del mes (1-31)
+# │ └───────── hora (0-23)
+# └─────────── minuto (0-59)
+#
+# ====================================================================
+
+# OPCIÓN 1: Ejecutar el primer día de cada mes a las 2:00 AM
+0 2 1 * * /usr/bin/python3 /home/in4p/Downloads/SMA/Códigos\ fuente\ y\ ficheros\ adicionales/Scripts/leer_meteoros_todos.py
+
+# OPCIÓN 2: Ejecutar cada domingo a las 3:00 AM
+0 3 * * 0 /usr/bin/python3 /home/in4p/Downloads/SMA/Códigos\ fuente\ y\ ficheros\ adicionales/Scripts/leer_meteoros_todos.py
+
+# OPCIÓN 3: Ejecutar diariamente a las 4:00 AM (para procesamiento más frecuente)
+0 4 * * * /usr/bin/python3 /home/in4p/Downloads/SMA/Códigos\ fuente\ y\ ficheros\ adicionales/Scripts/leer_meteoros_todos.py
+
+# OPCIÓN 4: Ejecutar el día 15 de cada mes a las 1:00 AM
+0 1 15 * * /usr/bin/python3 /home/in4p/Downloads/SMA/Códigos\ fuente\ y\ ficheros\ adicionales/Scripts/leer_meteoros_todos.py
+
+# NOTAS IMPORTANTES:
+# ------------------
+# 1. Los logs se guardarán en: /home/in4p/Downloads/SMA/Códigos fuente y ficheros adicionales/Scripts/logs/
+# 2. Asegúrate de que MySQL esté siempre activo cuando se ejecute el cron
+# 3. Verifica la ruta de python3 con: which python3
+# 4. Para ver los logs del cron: tail -f /var/log/cron (en algunos sistemas)
+# 5. Para verificar que el cron está instalado: crontab -l
+#
+# EJEMPLO DE MONITOREO:
+# ---------------------
+# Puedes añadir redirección de errores estándar para debugging:
+# 0 2 1 * * /usr/bin/python3 /home/in4p/Downloads/SMA/Códigos\ fuente\ y\ ficheros\ adicionales/Scripts/leer_meteoros_todos.py 2>&1 | logger -t meteoros_cron
+#
+# Esto enviará los mensajes al syslog con el tag "meteoros_cron"

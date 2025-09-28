@@ -2,6 +2,10 @@
 import sys
 import os
 import pathlib
+from decimal import Decimal, getcontext
+
+# Establecer precisión alta para manejar números muy pequeños
+getcontext().prec = 50
 
 ##########Conexion a la BD##############
 import mysql.connector
@@ -89,15 +93,15 @@ try:
             insertar = True
             for meteoro in meteoros:
                 if hora[:5] == meteoro[2][:5]:
-                    hora_sec = float(hora[6:])
-                    meteoro_sec = float(meteoro[2][6:])
-                    if meteoro_sec < hora_sec and meteoro_sec + 2 > hora_sec:
+                    hora_sec = Decimal(hora[6:])
+                    meteoro_sec = Decimal(meteoro[2][6:])
+                    if meteoro_sec < hora_sec and meteoro_sec + Decimal('2') > hora_sec:
                         idM = meteoro[0]
                         insertar = False
                     elif meteoro_sec == hora_sec:
                         idM = meteoro[0]
                         insertar = False
-                    elif meteoro_sec > hora_sec and meteoro_sec - 2 < hora_sec:
+                    elif meteoro_sec > hora_sec and meteoro_sec - Decimal('2') < hora_sec:
                         idM = meteoro[0]
                         insertar = False
 
@@ -221,9 +225,9 @@ try:
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             
             valores = (idInf, fecha, hora, int(estrellasVisibles), int(numEstrellas), 
-                      float(coefExtBoug), float(puntoCeroBoug), float(errorRegresion), 
-                      float(errorPuntoCero), float(errorCoefExt), coefParabola, 
-                      float(magMax), float(magMin), float(masaFotometrica), idM)
+                      Decimal(coefExtBoug), Decimal(puntoCeroBoug), Decimal(errorRegresion), 
+                      Decimal(errorPuntoCero), Decimal(errorCoefExt), coefParabola, 
+                      Decimal(magMax), Decimal(magMin), Decimal(masaFotometrica), idM)
             
             cursor.execute(insert, valores)
             cnxn.commit()
@@ -237,7 +241,7 @@ try:
                            (Identificador, Id_estrella, Masa_de_aire, Magnitud_de_catalogo, 
                             Magnitud_instrumental, Informe_Fotometria_Identificador) 
                            VALUES (%s, %s, %s, %s, %s, %s)"""
-                valores = (idStar, idEstrella, float(i[2]), float(i[3]), float(i[4]), idInf)
+                valores = (idStar, idEstrella, Decimal(i[2]), Decimal(i[3]), Decimal(i[4]), idInf)
                 cursor.execute(insert, valores)
                 cnxn.commit()
 
@@ -245,7 +249,7 @@ try:
                 insert = """INSERT INTO Puntos_del_ajuste 
                            (t, Dist, Mc, Ma, Informe_Fotometria_Identificador) 
                            VALUES (%s, %s, %s, %s, %s)"""
-                valores = (float(i[0]), float(i[1]), float(i[2]), float(i[3]), idInf)
+                valores = (Decimal(i[0]), Decimal(i[1]), Decimal(i[2]), Decimal(i[3]), idInf)
                 cursor.execute(insert, valores)
                 cnxn.commit()
             
@@ -253,9 +257,9 @@ try:
                        (X_Inicio, Y_Inicio, Maire_Inicio, distInicio, X_Final, 
                         Y_Final, Maire_Final, dist_Final, Informe_Fotometria_Identificador) 
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            valores = (float(datosMeteoro[0]), float(datosMeteoro[1]), float(datosMeteoro[2]), 
-                      float(datosMeteoro[3]), float(datosMeteoro[4]), float(datosMeteoro[5]), 
-                      float(datosMeteoro[6]), float(datosMeteoro[7]), idInf)
+            valores = (Decimal(datosMeteoro[0]), Decimal(datosMeteoro[1]), Decimal(datosMeteoro[2]), 
+                      Decimal(datosMeteoro[3]), Decimal(datosMeteoro[4]), Decimal(datosMeteoro[5]), 
+                      Decimal(datosMeteoro[6]), Decimal(datosMeteoro[7]), idInf)
             cursor.execute(insert, valores)
             cnxn.commit()
 

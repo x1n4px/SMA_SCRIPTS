@@ -3,6 +3,10 @@ import sys
 import os
 import math
 import pathlib
+from decimal import Decimal, getcontext
+
+# Establecer precisión alta para manejar números muy pequeños
+getcontext().prec = 50
 
 ##########Conexion a la BD##############
 import mysql.connector
@@ -324,7 +328,7 @@ try:
                 for i in cursor:
                     idEc = i[0] + 1
                 insert = "INSERT INTO Ecuacion_parametrica (IdEc, a, b, c, Inicio_Estacion_1, Fin_Estacion_1, Inicio_Estacion_2, Fin_Estacion_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(insert, (idEc, float(ecParam[0]), float(ecParam[1]), float(ecParam[2]), 
+                cursor.execute(insert, (idEc, Decimal(ecParam[0]), Decimal(ecParam[1]), Decimal(ecParam[2]),
                                        ptsEst1ParamInicio[0] + " " + ptsEst1ParamInicio[1] + " " + ptsEst1ParamInicio[2],
                                        ptsEst1ParamFinal[0] + " " + ptsEst1ParamFinal[1] + " " + ptsEst1ParamFinal[2],
                                        ptsEst2ParamInicio[0] + " " + ptsEst2ParamInicio[1] + " " + ptsEst2ParamInicio[2],
@@ -586,10 +590,11 @@ try:
             actual = actual + 15
 
             #Por petición de Alberto Castellón, el valor p de los elementos orbitales se modifica de forma que queda p = p*pi/180
-            p1 = (float(radianteGeocentrico[3][0]) * math.pi) / 180
-            p2 = (float(radianteGeocentrico[3][1]) * math.pi) / 180
-            p3 = (float(elemOrb[5][0]) * math.pi) / 180
-            p4 = (float(elemOrb[5][1]) * math.pi) / 180
+            pi_decimal = Decimal(str(math.pi))
+            p1 = (Decimal(radianteGeocentrico[3][0]) * pi_decimal) / Decimal('180')
+            p2 = (Decimal(radianteGeocentrico[3][1]) * pi_decimal) / Decimal('180')
+            p3 = (Decimal(elemOrb[5][0]) * pi_decimal) / Decimal('180')
+            p4 = (Decimal(elemOrb[5][1]) * pi_decimal) / Decimal('180')
 
             radianteGeocentrico[3][0] = str(p1)
             radianteGeocentrico[3][1] = str(p2)
@@ -611,13 +616,15 @@ try:
                 fechaBien = str(i[1])  # MySQL ya devuelve el formato correcto YYYY-MM-DD
                 if fecha == fechaBien:
                     if hora[:5] == str(i[2])[:5]:
-                        if float(str(i[2])[6:]) < float(hora[6:]) and float(str(i[2])[6:])+2 > float(hora[6:]):
+                        seg_db = Decimal(str(i[2])[6:])
+                        seg_hora = Decimal(hora[6:])
+                        if seg_db < seg_hora and seg_db + Decimal('2') > seg_hora:
                             idM = i[0]
                             insertar = False
-                        elif float(str(i[2])[6:]) == float(hora[6:]):
+                        elif seg_db == seg_hora:
                             idM = i[0]
                             insertar = False
-                        elif float(str(i[2])[6:]) > float(hora[6:]) and float(str(i[2])[6:])-2 < float(hora[6:]):
+                        elif seg_db > seg_hora and seg_db - Decimal('2') < seg_hora:
                             idM = i[0]
                             update_query = "UPDATE Meteoro SET Hora = %s, Fecha = %s WHERE Identificador = %s"
                             cursor.execute(update_query, (hora, fecha, i[0]))
@@ -634,23 +641,23 @@ try:
 
         if infNuevo:
             # Preparar valores para NULL de manera segura
-            angulo_val = None if anguloDiedro == "NULL" else float(anguloDiedro)
-            peso_val = None if pesoEstadistico == "NULL" else float(pesoEstadistico)
-            azimut_val = None if azimut == "NULL" else float(azimut)
-            dist_cenital_val = None if distCenital == "NULL" else float(distCenital)
-            dist_recorrida_est1_val = None if distRecorridaEst1 == "NULL" else float(distRecorridaEst1)
-            error_dist_est1_val = None if errorDistEst1 == "NULL" else float(errorDistEst1)
-            error_alturas_est1_val = None if errorAlturasEst1 == "NULL" else float(errorAlturasEst1)
-            dist_recorrida_est2_val = None if distRecorridaEst2 == "NULL" else float(distRecorridaEst2)
-            error_dist_est2_val = None if errorDistEst2 == "NULL" else float(errorDistEst2)
-            error_alturas_est2_val = None if errorAlturasEst2 == "NULL" else float(errorAlturasEst2)
-            tiempo_est1_val = None if tiempoEst1 == "NULL" else float(tiempoEst1)
-            v_media_val = None if vMedia == "NULL" else float(vMedia)
-            t_trayec_esta2_val = None if tTrayecEsta2 == "NULL" else float(tTrayecEsta2)
-            error_velocidad_val = None if errorVelocidad == "NULL" else float(errorVelocidad)
-            v_ini_est2_val = None if vIniEst2 == "NULL" else float(vIniEst2)
-            ace_kms_val = None if aceKMS == "NULL" else float(aceKMS)
-            ace_gs_val = None if aceGS == "NULL" else float(aceGS)
+            angulo_val = None if anguloDiedro == "NULL" else Decimal(anguloDiedro)
+            peso_val = None if pesoEstadistico == "NULL" else Decimal(pesoEstadistico)
+            azimut_val = None if azimut == "NULL" else Decimal(azimut)
+            dist_cenital_val = None if distCenital == "NULL" else Decimal(distCenital)
+            dist_recorrida_est1_val = None if distRecorridaEst1 == "NULL" else Decimal(distRecorridaEst1)
+            error_dist_est1_val = None if errorDistEst1 == "NULL" else Decimal(errorDistEst1)
+            error_alturas_est1_val = None if errorAlturasEst1 == "NULL" else Decimal(errorAlturasEst1)
+            dist_recorrida_est2_val = None if distRecorridaEst2 == "NULL" else Decimal(distRecorridaEst2)
+            error_dist_est2_val = None if errorDistEst2 == "NULL" else Decimal(errorDistEst2)
+            error_alturas_est2_val = None if errorAlturasEst2 == "NULL" else Decimal(errorAlturasEst2)
+            tiempo_est1_val = None if tiempoEst1 == "NULL" else Decimal(tiempoEst1)
+            v_media_val = None if vMedia == "NULL" else Decimal(vMedia)
+            t_trayec_esta2_val = None if tTrayecEsta2 == "NULL" else Decimal(tTrayecEsta2)
+            error_velocidad_val = None if errorVelocidad == "NULL" else Decimal(errorVelocidad)
+            v_ini_est2_val = None if vIniEst2 == "NULL" else Decimal(vIniEst2)
+            ace_kms_val = None if aceKMS == "NULL" else Decimal(aceKMS)
+            ace_gs_val = None if aceGS == "NULL" else Decimal(aceGS)
             metodo_val = None if metodo == "NULL" else metodo
 
             insert = """INSERT INTO Informe_Z (IdInforme, Observatorio_Número2, Observatorio_Número, Fecha, Hora, 
@@ -682,30 +689,30 @@ try:
                                    ace_gs_val, metodo_val, ruta, idEc, idM))
 
             for i in range(len(lluviasActivas)):
-                insert = "INSERT INTO Lluvia_Activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
+                insert = "INSERT INTO Lluvia_activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
                 cursor.execute(insert, (distMinRadTray[i], lluviasActivas[i], int(yearInforme), idInf))
 
             for i in range(len(trayecRegresionEst1)):
                 hora_trayec = trayecRegresionEst1[i][4] + ":" + trayecRegresionEst1[i][5] + ":" + trayecRegresionEst1[i][6]
                 insert = "INSERT INTO Trayectoria_por_regresion (Fecha, Hora, t, s, v_Kms, v_Pixs, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(insert, (fecha, hora_trayec, float(trayecRegresionEst1[i][0]), float(trayecRegresionEst1[i][1]), float(trayecRegresionEst1[i][2]), float(trayecRegresionEst1[i][3]), idInf))
+                cursor.execute(insert, (fecha, hora_trayec, Decimal(trayecRegresionEst1[i][0]), Decimal(trayecRegresionEst1[i][1]), Decimal(trayecRegresionEst1[i][2]), Decimal(trayecRegresionEst1[i][3]), idInf))
             
             for i in range(len(ajustesZWO)):
                 hora_ajuste = ajustesZWO[i][6] + ":" + ajustesZWO[i][7] + ":" + ajustesZWO[i][8]
                 insert = "INSERT INTO Puntos_ZWO (Fecha, Hora, X, Y, Ar_Grados, De_Grados, Ar_Sexagesimal, De_Sexagesimal, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(insert, (fecha, hora_ajuste, float(ajustesZWO[i][0]), float(ajustesZWO[i][1]), float(ajustesZWO[i][2]), float(ajustesZWO[i][3]), ajustesZWO[i][4], ajustesZWO[i][5], idInf))
+                cursor.execute(insert, (fecha, hora_ajuste, Decimal(ajustesZWO[i][0]), Decimal(ajustesZWO[i][1]), Decimal(ajustesZWO[i][2]), Decimal(ajustesZWO[i][3]), ajustesZWO[i][4], ajustesZWO[i][5], idInf))
             
 
             for i in range(len(trayectoriaEst1)):
                 hora_trayec = trayectoriaEst1[i][13] + ":" + trayectoriaEst1[i][14] + ":" + trayectoriaEst1[i][15]
                 # Manejo de valores NULL
-                s_val = None if trayectoriaEst1[i][0] == "0.000" else float(trayectoriaEst1[i][0])
-                t_val = None if trayectoriaEst1[i][1] == "NULL" else float(trayectoriaEst1[i][1])
-                v_val = None if trayectoriaEst1[i][2] == "NULL" else float(trayectoriaEst1[i][2])
-                x_val = None if trayectoriaEst1[i][9] == "NULL" else float(trayectoriaEst1[i][9])
-                y_val = None if trayectoriaEst1[i][10] == "NULL" else float(trayectoriaEst1[i][10])
-                pix_val = None if trayectoriaEst1[i][11] == "NULL" else float(trayectoriaEst1[i][11])
-                pix_seg_val = None if trayectoriaEst1[i][12] == "NULL" else float(trayectoriaEst1[i][12])
+                s_val = None if trayectoriaEst1[i][0] == "0.000" else Decimal(trayectoriaEst1[i][0])
+                t_val = None if trayectoriaEst1[i][1] == "NULL" else Decimal(trayectoriaEst1[i][1])
+                v_val = None if trayectoriaEst1[i][2] == "NULL" else Decimal(trayectoriaEst1[i][2])
+                x_val = None if trayectoriaEst1[i][9] == "NULL" else Decimal(trayectoriaEst1[i][9])
+                y_val = None if trayectoriaEst1[i][10] == "NULL" else Decimal(trayectoriaEst1[i][10])
+                pix_val = None if trayectoriaEst1[i][11] == "NULL" else Decimal(trayectoriaEst1[i][11])
+                pix_seg_val = None if trayectoriaEst1[i][12] == "NULL" else Decimal(trayectoriaEst1[i][12])
                 
                 insert = """INSERT INTO Trayectoria_medida (Fecha, Hora, s, t, v, lambda, phi, 
                            AR_Estacion_1, De_Estacion_1, Ar_Estacion_2, De_Estacion_2, X, Y, Pix, Pix_Seg, 

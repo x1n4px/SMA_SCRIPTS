@@ -2,6 +2,10 @@
 import sys
 import os
 import pathlib
+from decimal import Decimal, getcontext
+
+# Establecer precisión alta para manejar números muy pequeños
+getcontext().prec = 50
 
 ##########Conexion a la BD##############
 import mysql.connector
@@ -90,13 +94,15 @@ try:
                 fechaBien = str(i[1])  # MySQL ya devuelve el formato correcto YYYY-MM-DD
                 if fecha == fechaBien:
                     if hora[:5] == str(i[2])[:5]:
-                        if float(str(i[2])[6:]) < float(hora[6:]) and float(str(i[2])[6:])+2 > float(hora[6:]):
+                        seg_db = Decimal(str(i[2])[6:])
+                        seg_hora = Decimal(hora[6:])
+                        if seg_db < seg_hora and seg_db + Decimal('2') > seg_hora:
                             idM = i[0]
                             insertar = False
-                        elif float(str(i[2])[6:]) == float(hora[6:]):
+                        elif seg_db == seg_hora:
                             idM = i[0]
                             insertar = False
-                        elif float(str(i[2])[6:]) > float(hora[6:]) and float(str(i[2])[6:])-2 < float(hora[6:]):
+                        elif seg_db > seg_hora and seg_db - Decimal('2') < seg_hora:
                             idM = i[0]
                             insertar = False
 
@@ -212,11 +218,11 @@ try:
                     for i in cursor:
                         idInf = i[0] + 1
                     insert = "INSERT INTO Informe_Radiante (Identificador, Fecha, Hora, Velocidad_Lluvia_Asociada, Trayectorias_estimadas_para, Distancia_angular_radianes, Distancia_angular_grados, Velocidad_angular_grad_sec, Meteoro_Identificador, Observatorio_Número, Lluvia_Asociada) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                    cursor.execute(insert, (idInf, fecha, hora, str(velLluviaAsociada), str(tiempoTrayectorias), float(distAngular[0]), float(distAngular[1]), float(velAngular), idM, obsv, idLluviaAsociada))
+                    cursor.execute(insert, (idInf, fecha, hora, str(velLluviaAsociada), str(tiempoTrayectorias), Decimal(distAngular[0]), Decimal(distAngular[1]), Decimal(velAngular), idM, obsv, idLluviaAsociada))
 
                     for i in trayectorias:
                         insert = "INSERT INTO Trayectoria_estimada (Velocidad, Lon_Inicio, Lat_Inicio, Alt_Inicio, Dist_Inicio, Lon_Final, Lat_Final, Alt_Final, Dist_Final, Recor, e, t, Informe_Radiante_Identificador) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        cursor.execute(insert, (float(i[0]), i[1], i[2], float(i[3]), float(i[4]), i[5], i[6], float(i[7]), float(i[8]), float(i[9]), None, None, idInf))
+                        cursor.execute(insert, (Decimal(i[0]), i[1], i[2], Decimal(i[3]), Decimal(i[4]), i[5], i[6], Decimal(i[7]), Decimal(i[8]), Decimal(i[9]), None, None, idInf))
                 
                 else:
                     distAngular = "No medido"
@@ -261,15 +267,15 @@ try:
 
                     for i in trayectorias:
                         insert = "INSERT INTO Trayectoria_estimada (Velocidad, Lon_Inicio, Lat_Inicio, Alt_Inicio, Dist_Inicio, Lon_Final, Lat_Final, Alt_Final, Dist_Final, Recor, e, t, Informe_Radiante_Identificador) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        cursor.execute(insert, (None, i[0], i[1], float(i[2]), float(i[3]), i[4], i[5], float(i[6]), float(i[7]), None, float(i[8]), float(i[9]), idInf))
+                        cursor.execute(insert, (None, i[0], i[1], Decimal(i[2]), Decimal(i[3]), i[4], i[5], Decimal(i[6]), Decimal(i[7]), None, Decimal(i[8]), Decimal(i[9]), idInf))
 
             for i in distMinLluvias:
                 insert = "INSERT INTO Lluvia_Activa_InfRad (Ar_de_la_fecha, De_de_la_fecha, Ar_más_cercano, De_más_cercano, Distancia, Informe_Radiante_Identificador, Lluvia_Identificador, Lluvia_Año) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(insert, (float(i[1]), float(i[2]), float(i[3]), float(i[4]), float(i[5]), idInf, i[0], int(yearInforme)))
+                cursor.execute(insert, (Decimal(i[1]), Decimal(i[2]), Decimal(i[3]), Decimal(i[4]), Decimal(i[5]), idInf, i[0], int(yearInforme)))
 
             for i in velocidadesAngulares:
-                insert = "INSERT INTO Velociades_Angulares (hi, Lluvia, Meteoro, Informe_Radiante_Identificador) VALUES (%s, %s, %s, %s)"
-                cursor.execute(insert, (float(i[0]), float(i[1]), float(i[2]), idInf))
+                insert = "INSERT INTO Velocidades_Angulares (hi, Lluvia, Meteoro, Informe_Radiante_Identificador) VALUES (%s, %s, %s, %s)"
+                cursor.execute(insert, (Decimal(i[0]), Decimal(i[1]), Decimal(i[2]), idInf))
 
 
 
