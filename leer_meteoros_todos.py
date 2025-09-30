@@ -14,6 +14,15 @@ import subprocess
 import sys
 import logging
 from datetime import datetime as dt
+import time as time_module  # Para los delays de reintentos
+
+# Importar configuración centralizada
+try:
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+except ImportError:
+    print("❌ Error: No se pudo importar config_db.py")
+    print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
+    sys.exit(1)
 
 # Configurar logging para cron
 log_dir = Path(__file__).parent / "logs"
@@ -33,22 +42,41 @@ logger = logging.getLogger(__name__)
 
 def conectar_mysql():
     """
-    Establece conexión con la base de datos MySQL
+    Establece conexión con la base de datos MySQL usando configuración centralizada
     """
-    try:
-        conexion = mysql.connector.connect(
-            host='localhost',
-            database='astro',
-            user='in4p',
-            password='0000'
-        )
-        
-        if conexion.is_connected():
-            logger.info("Conexión exitosa a MySQL")
-            return conexion
-    except Error as e:
-        logger.error(f"Error al conectar a MySQL: {e}")
+    # Validar configuración
+    config_valida, mensaje = validate_config()
+    if not config_valida:
+        logger.error(f"Error en configuración: {mensaje}")
         return None
+    
+    # Obtener configuración de reintentos
+    max_intentos = CONNECTION_CONFIG.get('retry_attempts', 3)
+    delay_reintentos = CONNECTION_CONFIG.get('retry_delay', 5)
+    
+    for intento in range(1, max_intentos + 1):
+        try:
+            logger.info(f"Intento {intento}/{max_intentos} - Conectando a {get_connection_string()}")
+            
+            # Usar configuración centralizada
+            conexion = mysql.connector.connect(**DB_CONFIG)
+            
+            if conexion.is_connected():
+                logger.info("Conexión exitosa a MySQL")
+                db_info = conexion.get_server_info()
+                logger.info(f"Versión del servidor MySQL: {db_info}")
+                return conexion
+                
+        except Error as e:
+            logger.error(f"Error en intento {intento}: {e}")
+            
+            if intento < max_intentos:
+                logger.info(f"Esperando {delay_reintentos} segundos antes de reintentar...")
+                time_module.sleep(delay_reintentos)
+            else:
+                logger.error(f"No se pudo conectar después de {max_intentos} intentos")
+    
+    return None
 
 def obtener_ultima_fecha_hora(conexion):
     """
@@ -57,9 +85,12 @@ def obtener_ultima_fecha_hora(conexion):
     try:
         cursor = conexion.cursor()
         
-        query = """
+        # Usar nombre de tabla desde configuración
+        tabla_meteoro = TABLES.get('meteoro', 'Meteoro')
+        
+        query = f"""
         SELECT Fecha, Hora 
-        FROM Meteoro 
+        FROM {tabla_meteoro} 
         ORDER BY fecha DESC, hora DESC 
         LIMIT 1
         """

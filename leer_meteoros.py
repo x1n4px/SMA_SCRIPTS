@@ -13,26 +13,53 @@ from pathlib import Path
 import subprocess
 import sys
 import argparse
+import time as time_module  # Para los delays de reintentos
+
+# Importar configuración de base de datos
+try:
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+except ImportError:
+    print("❌ Error: No se pudo importar config_db.py")
+    print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
+    sys.exit(1)
 
 def conectar_mysql():
     """
-    Establece conexión con la base de datos MySQL
+    Establece conexión con la base de datos MySQL usando configuración centralizada
     """
-    try:
-        # Configuración de conexión - ajusta estos valores según tu configuración
-        conexion = mysql.connector.connect(
-            host='localhost',
-            database='astro',  # Cambia por el nombre de tu base de datos
-            user='in4p',              # Cambia por tu usuario MySQL
-            password='0000'        # Cambia por tu contraseña MySQL
-        )
-        
-        if conexion.is_connected():
-            print("Conexión exitosa a MySQL")
-            return conexion
-    except Error as e:
-        print(f"Error al conectar a MySQL: {e}")
+    # Validar configuración antes de intentar conectar
+    config_valida, mensaje = validate_config()
+    if not config_valida:
+        print(f"❌ Error en configuración: {mensaje}")
         return None
+    
+    # Obtener configuración de reintentos
+    max_intentos = CONNECTION_CONFIG.get('retry_attempts', 3)
+    delay_reintentos = CONNECTION_CONFIG.get('retry_delay', 5)
+    
+    for intento in range(1, max_intentos + 1):
+        try:
+            print(f"🔄 Intento {intento}/{max_intentos} - Conectando a {get_connection_string()}")
+            
+            # Usar configuración centralizada
+            conexion = mysql.connector.connect(**DB_CONFIG)
+            
+            if conexion.is_connected():
+                print("✅ Conexión exitosa a MySQL")
+                db_info = conexion.get_server_info()
+                print(f"📊 Versión del servidor MySQL: {db_info}")
+                return conexion
+                
+        except Error as e:
+            print(f"❌ Error en intento {intento}: {e}")
+            
+            if intento < max_intentos:
+                print(f"⏳ Esperando {delay_reintentos} segundos antes de reintentar...")
+                time_module.sleep(delay_reintentos)
+            else:
+                print(f"❌ No se pudo conectar después de {max_intentos} intentos")
+    
+    return None
 
 def obtener_ultima_fecha_hora(conexion):
     """
@@ -41,10 +68,13 @@ def obtener_ultima_fecha_hora(conexion):
     try:
         cursor = conexion.cursor()
         
+        # Usar nombre de tabla desde configuración
+        tabla_meteoro = TABLES.get('meteoro', 'Meteoro')
+        
         # Query para obtener la última fecha y hora
-        query = """
+        query = f"""
         SELECT Fecha, Hora 
-        FROM Meteoro 
+        FROM {tabla_meteoro} 
         ORDER BY fecha DESC, hora DESC 
         LIMIT 1
         """
@@ -768,6 +798,12 @@ def main():
     print("=" * 50)
     print("SCRIPT DE LECTURA DE TABLA METEOROS")
     print("=" * 50)
+    
+    # Mostrar información de configuración
+    print(f"\n🔧 Usando configuración desde: config_db.py")
+    print(f"   Base de datos: {DB_CONFIG.get('database')}")
+    print(f"   Servidor: {DB_CONFIG.get('host')}:{DB_CONFIG.get('port', 3306)}")
+    print(f"   Usuario: {DB_CONFIG.get('user')}")
     
     # Mostrar la ruta que se va a usar
     if args.ruta_base:

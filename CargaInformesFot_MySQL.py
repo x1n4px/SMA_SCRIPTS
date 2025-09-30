@@ -9,28 +9,33 @@ getcontext().prec = 50
 
 ##########Conexion a la BD##############
 import mysql.connector
+from mysql.connector import Error
 
-# Configuración de conexión MySQL
-server = 'localhost'  # o la IP del servidor MySQL
-database = 'astro'  # Base de datos para meteoros
-username = 'in4p'   # Usuario MySQL
-password = '0000'   # Contraseña MySQL
-port = 3306  # Puerto por defecto de MySQL
+# Importar configuración centralizada
+try:
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+except ImportError:
+    print("❌ Error: No se pudo importar config_db.py")
+    print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
+    sys.exit(1)
 
 cnxn = None
 cursor = None
 
 try:
+    # Validar configuración
+    config_valida, mensaje = validate_config()
+    if not config_valida:
+        print(f"❌ Error en configuración: {mensaje}")
+        sys.exit(1)
+    
+    # Crear copia de configuración con autocommit y timeout
+    config_con_autocommit = DB_CONFIG.copy()
+    config_con_autocommit['autocommit'] = True
+    config_con_autocommit['connection_timeout'] = CONNECTION_CONFIG.get('connection_timeout', 30)
+    
     # Conexión a MySQL
-    cnxn = mysql.connector.connect(
-        host=server,
-        port=port,
-        database=database,
-        user=username,
-        password=password,
-        connection_timeout=15,
-        autocommit=True
-    )
+    cnxn = mysql.connector.connect(**config_con_autocommit)
     cursor = cnxn.cursor()
     ##########Conexion a la BD##############
 

@@ -3,33 +3,66 @@ import sys
 import os
 import math
 import pathlib
-from decimal import Decimal, getcontext
+from decimal import Decimal, getcontext, InvalidOperation
 
 # Establecer precisión alta para manejar números muy pequeños
 getcontext().prec = 50
+
+# Importar helper para procesamiento de decimales si existe
+try:
+    from decimal_helper import procesar_valor_numerico
+except ImportError:
+    # Si no existe el helper, crear una función simple
+    def procesar_valor_numerico(valor):
+        """Procesa un valor numérico para convertirlo a Decimal de manera segura"""
+        if valor is None or valor == '' or valor == 'NULL' or valor == 'No medido':
+            return None
+        
+        try:
+            # Limpiar el valor
+            valor_str = str(valor).strip()
+            
+            # Si el valor es muy largo, truncarlo para que quepa en decimal(8,4)
+            if '.' in valor_str:
+                partes = valor_str.split('.')
+                # Limitar parte entera a 4 dígitos y decimales a 4
+                if len(partes[0]) > 4:
+                    partes[0] = partes[0][:4]
+                if len(partes[1]) > 4:
+                    partes[1] = partes[1][:4]
+                valor_str = '.'.join(partes)
+            
+            return Decimal(valor_str)
+        except (InvalidOperation, ValueError):
+            return None
 
 ##########Conexion a la BD##############
 import mysql.connector
 from mysql.connector import Error
 
-server = 'localhost'  # o tu servidor MySQL
-database = 'astro'  # Base de datos para meteoros
-username = 'in4p'   # Usuario MySQL
-password = '0000'   # Contraseña MySQL
-port = 3306  # puerto por defecto de MySQL
+# Importar configuración centralizada
+try:
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+except ImportError:
+    print("❌ Error: No se pudo importar config_db.py")
+    print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
+    sys.exit(1)
 
 cnxn = None
 cursor = None
 
 try:
-    cnxn = mysql.connector.connect(
-        host=server,
-        database=database,
-        user=username,
-        password=password,
-        port=port,
-        autocommit=True  # Para que los INSERT se ejecuten automáticamente
-    )
+    # Validar configuración
+    config_valida, mensaje = validate_config()
+    if not config_valida:
+        print(f"❌ Error en configuración: {mensaje}")
+        sys.exit(1)
+    
+    # Crear copia de configuración con autocommit
+    config_con_autocommit = DB_CONFIG.copy()
+    config_con_autocommit['autocommit'] = True  # Para que los INSERT se ejecuten automáticamente
+    
+    cnxn = mysql.connector.connect(**config_con_autocommit)
     cursor = cnxn.cursor()
     ##########Conexion a la BD##############
 
@@ -77,7 +110,8 @@ try:
             # Comprobamos si existe ya un informe en esta hora y dia
             infNuevo = True
             cursor.execute("SELECT IdInforme, Fecha, Hora FROM Informe_Z")
-            for i in cursor:
+            resultados = cursor.fetchall()  # Leer todos los resultados de una vez
+            for i in resultados:
                 if str(i[1]) == fecha and str(i[2]) == hora:
                     infNuevo = False
                     idInf = i[0]
@@ -86,13 +120,22 @@ try:
                 if len(sys.argv) == 1:
                     print(ruta + "/" + informe)
                 cursor.execute("SELECT COUNT(*) FROM Informe_Z")
-                for i in cursor:
-                    idInf = i[0] + 1
+                resultado = cursor.fetchone()
+                idInf = resultado[0] + 1 if resultado else 1
 
             # Sacamos valores de la estación 1
             aux = lineasarchivo[actual][40:].split(":")
             estacion1 = []
-            estacion1.append(aux[0]) # Numero
+            num_estacion1 = aux[0].strip()
+            
+            # Verificar que el observatorio existe
+            cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion1,))
+            if not cursor.fetchone():
+                print(f"  ⚠ Advertencia: Observatorio {num_estacion1} no existe. Creando...")
+                cursor.execute("INSERT INTO Observatorio (Número, Nombre_Camara, Nombre_Observatorio) VALUES (%s, %s, %s)", 
+                              (num_estacion1, f"Observatorio_{num_estacion1}", f"Observatorio_{num_estacion1}"))
+            
+            estacion1.append(num_estacion1) # Numero
 
             aux = (aux[1].split(' '))
             estacion1.append(aux[1]) # Longitud
@@ -107,7 +150,16 @@ try:
             # Sacamos valores de la estación 2
             aux = lineasarchivo[actual+1][40:].split(":")
             estacion2 = []
-            estacion2.append(aux[0]) # Numero
+            num_estacion2 = aux[0].strip()
+            
+            # Verificar que el observatorio existe
+            cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion2,))
+            if not cursor.fetchone():
+                print(f"  ⚠ Advertencia: Observatorio {num_estacion2} no existe. Creando...")
+                cursor.execute("INSERT INTO Observatorio (Número, Nombre_Camara, Nombre_Observatorio) VALUES (%s, %s, %s)", 
+                              (num_estacion2, f"Observatorio_{num_estacion2}", f"Observatorio_{num_estacion2}"))
+            
+            estacion2.append(num_estacion2) # Numero
 
             aux = (aux[1].split(' '))
             estacion2.append(aux[1]) # Longitud
@@ -139,12 +191,18 @@ try:
             actual = actual + 3
             while lineasarchivo[actual] != "" :
                 if lineasarchivo[actual][25] != " ":
-                    ajuste = lineasarchivo[actual][25:].split(' ') # Añadimos X/Y y Ar/De del ajuste
+                    ajuste_raw = lineasarchivo[actual][25:].split(' ') # Añadimos X/Y y Ar/De del ajuste
                 else:
-                    ajuste = lineasarchivo[actual][26:].split(' ') # Añadimos X/Y y Ar/De del ajuste
+                    ajuste_raw = lineasarchivo[actual][26:].split(' ') # Añadimos X/Y y Ar/De del ajuste
+                
+                # Filtrar elementos vacíos del split
+                ajuste = [x for x in ajuste_raw if x != '']
+                
+                # Añadir información de tiempo
                 ajuste.append(lineasarchivo[actual][11:][:2]) # Añadimos la hora
                 ajuste.append(lineasarchivo[actual][14:][:2]) # Añadimos el minuto
                 ajuste.append(lineasarchivo[actual][17:][:7]) # Añadimos el segundo
+                
                 ajustesZWO.append(ajuste)
                 actual = actual+1
                 # Actualizamos actual 
@@ -325,8 +383,8 @@ try:
 
             if infNuevo:
                 cursor.execute("SELECT COUNT(*) FROM Ecuacion_parametrica")
-                for i in cursor:
-                    idEc = i[0] + 1
+                resultado = cursor.fetchone()
+                idEc = resultado[0] + 1 if resultado else 1
                 insert = "INSERT INTO Ecuacion_parametrica (IdEc, a, b, c, Inicio_Estacion_1, Fin_Estacion_1, Inicio_Estacion_2, Fin_Estacion_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert, (idEc, Decimal(ecParam[0]), Decimal(ecParam[1]), Decimal(ecParam[2]),
                                        ptsEst1ParamInicio[0] + " " + ptsEst1ParamInicio[1] + " " + ptsEst1ParamInicio[2],
@@ -336,8 +394,8 @@ try:
         else:
             if infNuevo:
                 cursor.execute("SELECT COUNT(*) FROM Ecuacion_parametrica")
-                for i in cursor:
-                    idEc = i[0] + 1
+                resultado = cursor.fetchone()
+                idEc = resultado[0] + 1 if resultado else 1
                 insert = "INSERT INTO Ecuacion_parametrica (IdEc, a, b, c, Inicio_Estacion_1, Fin_Estacion_1, Inicio_Estacion_2, Fin_Estacion_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert, (idEc, None, None, None, None, None, None, None))
             
@@ -610,9 +668,10 @@ try:
 
         if infNuevo:
             cursor.execute("SELECT * FROM Meteoro")
+            meteoros = cursor.fetchall()  # Leer todos los resultados de una vez
             insertar = True
             update = False
-            for i in cursor:
+            for i in meteoros:
                 fechaBien = str(i[1])  # MySQL ya devuelve el formato correcto YYYY-MM-DD
                 if fecha == fechaBien:
                     if hora[:5] == str(i[2])[:5]:
@@ -632,10 +691,9 @@ try:
                             insertar = False
             
             if insertar:
-                cursor.execute("SELECT * FROM Meteoro")
-                idM = 1
-                for i in cursor:
-                    idM = i[0] + 1
+                cursor.execute("SELECT MAX(Identificador) FROM Meteoro")
+                resultado = cursor.fetchone()
+                idM = (resultado[0] + 1) if resultado and resultado[0] else 1
                 insert = "INSERT INTO Meteoro (Identificador, Fecha, Hora) VALUES (%s, %s, %s)"
                 cursor.execute(insert, (idM, fecha, hora))
 
@@ -654,7 +712,23 @@ try:
             tiempo_est1_val = None if tiempoEst1 == "NULL" else Decimal(tiempoEst1)
             v_media_val = None if vMedia == "NULL" else Decimal(vMedia)
             t_trayec_esta2_val = None if tTrayecEsta2 == "NULL" else Decimal(tTrayecEsta2)
-            error_velocidad_val = None if errorVelocidad == "NULL" else Decimal(errorVelocidad)
+            # Procesar Error_Velocidad con límite de precisión
+            error_velocidad_val = None
+            if errorVelocidad != "NULL" and errorVelocidad != "No medido":
+                try:
+                    error_velocidad_val = procesar_valor_numerico(errorVelocidad)
+                    # Limitar a 18 dígitos totales, 15 decimales
+                    if error_velocidad_val is not None:
+                        error_velocidad_str = str(error_velocidad_val)
+                        if '.' in error_velocidad_str:
+                            partes = error_velocidad_str.split('.')
+                            if len(partes[0]) > 3:  # decimal(18,15) = max 3 enteros
+                                partes[0] = partes[0][:3]
+                            if len(partes[1]) > 15:
+                                partes[1] = partes[1][:15]
+                            error_velocidad_val = Decimal('.'.join(partes))
+                except:
+                    error_velocidad_val = None
             v_ini_est2_val = None if vIniEst2 == "NULL" else Decimal(vIniEst2)
             ace_kms_val = None if aceKMS == "NULL" else Decimal(aceKMS)
             ace_gs_val = None if aceGS == "NULL" else Decimal(aceGS)
@@ -699,8 +773,32 @@ try:
             
             for i in range(len(ajustesZWO)):
                 hora_ajuste = ajustesZWO[i][6] + ":" + ajustesZWO[i][7] + ":" + ajustesZWO[i][8]
-                insert = "INSERT INTO Puntos_ZWO (Fecha, Hora, X, Y, Ar_Grados, De_Grados, Ar_Sexagesimal, De_Sexagesimal, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(insert, (fecha, hora_ajuste, Decimal(ajustesZWO[i][0]), Decimal(ajustesZWO[i][1]), Decimal(ajustesZWO[i][2]), Decimal(ajustesZWO[i][3]), ajustesZWO[i][4], ajustesZWO[i][5], idInf))
+                
+                # Procesar valores numéricos de forma segura
+                x_val = procesar_valor_numerico(ajustesZWO[i][0]) if len(ajustesZWO[i]) > 0 else None
+                y_val = procesar_valor_numerico(ajustesZWO[i][1]) if len(ajustesZWO[i]) > 1 else None
+                
+                # Para Ar_Grados y De_Grados, verificar que existan y sean numéricos
+                ar_grados_val = None
+                de_grados_val = None
+                ar_sexagesimal = None
+                de_sexagesimal = None
+                
+                if len(ajustesZWO[i]) > 2:
+                    ar_grados_val = procesar_valor_numerico(ajustesZWO[i][2])
+                if len(ajustesZWO[i]) > 3:
+                    de_grados_val = procesar_valor_numerico(ajustesZWO[i][3])
+                if len(ajustesZWO[i]) > 4:
+                    ar_sexagesimal = ajustesZWO[i][4] if ajustesZWO[i][4] != '' else None
+                if len(ajustesZWO[i]) > 5:
+                    de_sexagesimal = ajustesZWO[i][5] if ajustesZWO[i][5] != '' else None
+                
+                # Solo insertar si tenemos al menos X e Y
+                if x_val is not None and y_val is not None:
+                    insert = "INSERT INTO Puntos_ZWO (Fecha, Hora, X, Y, Ar_Grados, De_Grados, Ar_Sexagesimal, De_Sexagesimal, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                    cursor.execute(insert, (fecha, hora_ajuste, x_val, y_val, ar_grados_val, de_grados_val, ar_sexagesimal, de_sexagesimal, idInf))
+                else:
+                    print(f"  ⚠ Advertencia: Saltando punto ZWO con valores inválidos en índice {i}")
             
 
             for i in range(len(trayectoriaEst1)):
@@ -726,7 +824,8 @@ try:
         if hayOrb:
             addEO = True
             cursor.execute("SELECT Calculados_Con FROM Elementos_Orbitales WHERE Informe_Z_IdInforme = %s", (idInf,))
-            for i in cursor:
+            resultados_eo = cursor.fetchall()
+            for i in resultados_eo:
                 if str(i[0]) == calcCon:
                     addEO = False
             if addEO:

@@ -11,19 +11,18 @@ import math
 import pathlib
 from datetime import datetime, timedelta
 import mysql.connector
+from mysql.connector import Error
 from typing import List, Tuple, Optional
 
 # =============================================================================
-# CONFIGURACIÓN DE LA BASE DE DATOS
+# IMPORTAR CONFIGURACIÓN CENTRALIZADA
 # =============================================================================
-DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'database': 'database',
-    'user': 'usuario',
-    'password': 'password',
-    'connection_timeout': 15
-}
+try:
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+except ImportError:
+    print("❌ Error: No se pudo importar config_db.py")
+    print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
+    sys.exit(1)
 
 # =============================================================================
 # CLASE PRINCIPAL DEL PROCESADOR
@@ -40,14 +39,25 @@ class ProcesadorInformes:
         }
         
     def conectar_db(self) -> bool:
-        """Establece conexión con la base de datos MySQL"""
+        """Establece conexión con la base de datos MySQL usando configuración centralizada"""
+        # Validar configuración
+        config_valida, mensaje = validate_config()
+        if not config_valida:
+            print(f"❌ Error en configuración: {mensaje}")
+            return False
+        
         try:
-            self.cnxn = mysql.connector.connect(**DB_CONFIG)
+            # Crear copia de configuración con timeout
+            config_con_timeout = DB_CONFIG.copy()
+            config_con_timeout['connection_timeout'] = CONNECTION_CONFIG.get('connection_timeout', 30)
+            
+            print(f"🔄 Conectando a {get_connection_string()}")
+            self.cnxn = mysql.connector.connect(**config_con_timeout)
             self.cursor = self.cnxn.cursor()
-            print("✓ Conexión establecida con la base de datos")
+            print("✅ Conexión establecida con la base de datos")
             return True
         except mysql.connector.Error as e:
-            print(f"✗ Error de conexión MySQL: {e}")
+            print(f"❌ Error de conexión MySQL: {e}")
             return False
     
     def cerrar_db(self):
