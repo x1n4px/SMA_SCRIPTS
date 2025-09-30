@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import argparse
 
 def conectar_mysql():
     """
@@ -141,14 +142,24 @@ def separar_hora(hora):
         return segundos, minutos, horas, milisegundos
     return None, None, None, None
 
-def obtener_directorios_pendientes(año_ultimo, mes_ultimo, dia_ultimo, hora_completa):
+def obtener_directorios_pendientes(año_ultimo, mes_ultimo, dia_ultimo, hora_completa, ruta_base=None):
     """
     Obtiene la lista de directorios pendientes de procesar desde la última fecha/hora procesada
     Retorna una tupla: (directorios_pendientes, info_procesamiento)
+    
+    Args:
+        año_ultimo: Año de la última fecha procesada
+        mes_ultimo: Mes de la última fecha procesada
+        dia_ultimo: Día de la última fecha procesada
+        hora_completa: Hora completa de la última procesada
+        ruta_base: Ruta base para buscar directorios (opcional)
     """
     # Construir ruta base
-    script_dir = Path(__file__).parent
-    ruta_base = script_dir / "Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones"
+    if ruta_base is None:
+        script_dir = Path(__file__).parent
+        ruta_base = script_dir / "/home/sma/Meteoros/Detecciones"
+    else:
+        ruta_base = Path(ruta_base)
     
     directorios_pendientes = []
     info_global = {
@@ -739,9 +750,40 @@ def main():
     """
     Función principal del script
     """
+    # Configurar parser de argumentos
+    parser = argparse.ArgumentParser(
+        description='Script para procesar detecciones de meteoros desde la base de datos MySQL',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        'ruta_base',
+        nargs='?',
+        help='Ruta base para buscar los directorios de detecciones.\n'
+             'Ejemplo: /Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones\n'
+             'Si no se proporciona, se usa la ruta predeterminada relativa al script.'
+    )
+    
+    args = parser.parse_args()
+    
     print("=" * 50)
     print("SCRIPT DE LECTURA DE TABLA METEOROS")
     print("=" * 50)
+    
+    # Mostrar la ruta que se va a usar
+    if args.ruta_base:
+        ruta_absoluta = Path(args.ruta_base).resolve()
+        print(f"\n📂 Usando ruta base proporcionada:")
+        print(f"   {ruta_absoluta}")
+        
+        # Verificar que la ruta existe
+        if not ruta_absoluta.exists():
+            print(f"\n❌ Error: La ruta proporcionada no existe: {ruta_absoluta}")
+            sys.exit(1)
+        if not ruta_absoluta.is_dir():
+            print(f"\n❌ Error: La ruta proporcionada no es un directorio: {ruta_absoluta}")
+            sys.exit(1)
+    else:
+        print(f"\n📂 Usando ruta base predeterminada")
     
     # Conectar a MySQL
     conexion = conectar_mysql()
@@ -785,7 +827,10 @@ def main():
                 
                 # Obtener directorios pendientes de procesar
                 if año is not None and mes is not None and dia is not None:
-                    directorios_pendientes, info = obtener_directorios_pendientes(año, mes, dia, hora)
+                    directorios_pendientes, info = obtener_directorios_pendientes(
+                        año, mes, dia, hora,
+                        ruta_base=args.ruta_base if args.ruta_base else None
+                    )
                     
                     if info and mostrar_directorios_pendientes(directorios_pendientes, info):
                         # Solo mostrar menú si hay directorios pendientes
