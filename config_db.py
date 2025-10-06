@@ -49,8 +49,9 @@ TABLES = {
     'meteoro': 'Meteoro',
     'observatorio': 'Observatorio',
     'lluvia': 'Lluvia',
-    'radiante': 'Radiante',
-    'fotometria': 'Fotometria',
+    'radiante': 'Informe_Radiante',
+    'fotometria': 'Informe_Fotometria',
+    'informe_z': 'Informe_Z',
     # Agregar más tablas según sea necesario
 }
 

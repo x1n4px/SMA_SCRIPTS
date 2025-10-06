@@ -187,7 +187,7 @@ def obtener_directorios_pendientes(año_ultimo, mes_ultimo, dia_ultimo, hora_com
     # Construir ruta base
     if ruta_base is None:
         script_dir = Path(__file__).parent
-        ruta_base = script_dir / "/home/sma/Meteoros/Detecciones"
+        ruta_base = script_dir / "Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones"
     else:
         ruta_base = Path(ruta_base)
     
