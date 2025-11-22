@@ -14,6 +14,8 @@ import subprocess
 import sys
 import argparse
 import time as time_module  # Para los delays de reintentos
+import logging
+from typing import Dict, List, Tuple
 
 # Importar configuración de base de datos
 try:
@@ -22,6 +24,53 @@ except ImportError:
     print("❌ Error: No se pudo importar config_db.py")
     print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
     sys.exit(1)
+
+# Variable global para el logger
+logger = None
+
+def configurar_logging(modo_cron=False):
+    """
+    Configura el sistema de logging para el script.
+    Si modo_cron=True, crea un archivo log con la fecha actual.
+    """
+    global logger
+    
+    if modo_cron:
+        # Crear directorio de logs si no existe
+        log_dir = Path(__file__).parent / "logs"
+        log_dir.mkdir(exist_ok=True)
+        
+        # Nombre del archivo log con fecha y hora
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = log_dir / f"procesamiento_meteoros_{timestamp}.log"
+        
+        # Configurar logging para archivo
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s | %(levelname)s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler(log_file, encoding='utf-8'),
+                logging.StreamHandler()  # También mostrar en consola
+            ]
+        )
+        
+        logger = logging.getLogger(__name__)
+        logger.info("="*80)
+        logger.info("INICIO DE PROCESAMIENTO AUTOMÁTICO DE METEOROS")
+        logger.info(f"Fecha y hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(f"Archivo de log: {log_file}")
+        logger.info("="*80)
+        
+        return str(log_file)
+    else:
+        # Configuración básica para modo interactivo
+        logging.basicConfig(
+            level=logging.WARNING,
+            format='%(message)s'
+        )
+        logger = logging.getLogger(__name__)
+        return None
 
 def conectar_mysql():
     """
@@ -284,6 +333,133 @@ def obtener_directorios_pendientes(año_ultimo, mes_ultimo, dia_ultimo, hora_com
     
     return directorios_pendientes, info_global
 
+def obtener_todos_directorios(ruta_base=None):
+    """
+    Obtiene TODOS los directorios disponibles sin importar la fecha.
+    Útil para reprocesar o recuperar detecciones no subidas.
+    
+    Args:
+        ruta_base: Ruta base para buscar directorios (opcional)
+    
+    Returns:
+        Tupla: (directorios_disponibles, info_procesamiento)
+    """
+    # Construir ruta base
+    if ruta_base is None:
+        script_dir = Path(__file__).parent
+        ruta_base = script_dir / "Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones"
+    else:
+        ruta_base = Path(ruta_base)
+    
+    directorios_disponibles = []
+    info_global = {
+        'total_directorios': 0,
+        'total_años': 0,
+        'total_fechas': 0,
+        'fechas_analizadas': [],
+        'primera_fecha': None,
+        'ultima_fecha': None
+    }
+    
+    # Buscar en todos los años disponibles
+    try:
+        años_disponibles = sorted([d for d in ruta_base.iterdir() if d.is_dir() and d.name.isdigit()])
+        info_global['total_años'] = len(años_disponibles)
+        
+        fechas_totales = set()
+        
+        for ruta_año in años_disponibles:
+            año_actual = int(ruta_año.name)
+            
+            # Obtener todas las fechas disponibles en este año
+            fechas_disponibles = sorted([d for d in ruta_año.iterdir() if d.is_dir() and len(d.name) == 8 and d.name.isdigit()])
+            
+            for ruta_fecha in fechas_disponibles:
+                fecha_str = ruta_fecha.name
+                fechas_totales.add(fecha_str)
+                
+                # Obtener directorios de hora en esta fecha
+                try:
+                    directorios_hora = sorted([d for d in ruta_fecha.iterdir() if d.is_dir() and len(d.name) == 6 and d.name.isdigit()])
+                    info_global['total_directorios'] += len(directorios_hora)
+                    
+                    # Añadir todos los directorios
+                    for directorio in directorios_hora:
+                        directorios_disponibles.append({
+                            'nombre': directorio.name,
+                            'ruta': str(directorio),
+                            'fecha': fecha_str,
+                            'año': año_actual,
+                            'fecha_formato': f"{fecha_str[:4]}-{fecha_str[4:6]}-{fecha_str[6:8]}",
+                            'hora_formato': f"{directorio.name[:2]}:{directorio.name[2:4]}:{directorio.name[4:6]}"
+                        })
+                    
+                    if len(directorios_hora) > 0:
+                        info_global['fechas_analizadas'].append(f"{fecha_str} ({len(directorios_hora)} dirs)")
+                        
+                except Exception as e:
+                    print(f"⚠️  Error procesando fecha {fecha_str}: {e}")
+                    continue
+        
+        info_global['total_fechas'] = len(fechas_totales)
+        if fechas_totales:
+            info_global['primera_fecha'] = min(fechas_totales)
+            info_global['ultima_fecha'] = max(fechas_totales)
+                    
+    except Exception as e:
+        print(f"\n❌ Error al analizar directorios: {e}")
+        return [], {}
+    
+    return directorios_disponibles, info_global
+
+def mostrar_todos_directorios(directorios_disponibles, info):
+    """
+    Muestra la información de todos los directorios disponibles
+    """
+    print("\n" + "=" * 60)
+    print("ANÁLISIS COMPLETO DE TODOS LOS DIRECTORIOS")
+    print("=" * 60)
+    print(f"📊 Total de directorios disponibles: {info['total_directorios']}")
+    print(f"📅 Total de años: {info['total_años']}")
+    print(f"📅 Total de fechas únicas: {info['total_fechas']}")
+    
+    if info['primera_fecha'] and info['ultima_fecha']:
+        primera = info['primera_fecha']
+        ultima = info['ultima_fecha']
+        print(f"📅 Rango de fechas: {primera[:4]}-{primera[4:6]}-{primera[6:8]} a {ultima[:4]}-{ultima[4:6]}-{ultima[6:8]}")
+    
+    # Mostrar resumen de fechas analizadas
+    if info['fechas_analizadas']:
+        print(f"\n📅 Primeras y últimas fechas con datos:")
+        # Mostrar primeras 5 y últimas 5
+        if len(info['fechas_analizadas']) <= 10:
+            for fecha_info in info['fechas_analizadas']:
+                print(f"   • {fecha_info}")
+        else:
+            for fecha_info in info['fechas_analizadas'][:5]:
+                print(f"   • {fecha_info}")
+            print(f"   ... ({len(info['fechas_analizadas']) - 10} fechas más) ...")
+            for fecha_info in info['fechas_analizadas'][-5:]:
+                print(f"   • {fecha_info}")
+    
+    if directorios_disponibles:
+        # Agrupar por año para mejor visualización
+        años_agrupados = {}
+        for directorio in directorios_disponibles:
+            año = directorio['año']
+            if año not in años_agrupados:
+                años_agrupados[año] = 0
+            años_agrupados[año] += 1
+        
+        print(f"\n📊 Distribución por año:")
+        for año in sorted(años_agrupados.keys()):
+            print(f"   • {año}: {años_agrupados[año]} directorios")
+        
+        return True
+    else:
+        print("\n⚠️ No se encontraron directorios para procesar")
+        return False
+
 def mostrar_directorios_pendientes(directorios_pendientes, info):
     """
     Muestra la información de los directorios pendientes
@@ -346,7 +522,8 @@ def mostrar_menu():
     print("=" * 50)
     print("1. Seleccionar manualmente directorios a procesar")
     print("2. Procesar todos los directorios pendientes")
-    print("3. Salir")
+    print("3. Procesar TODOS los directorios (sin filtro de fecha)")
+    print("4. Salir")
     print("=" * 50)
 
 def procesar_todos_los_informes(directorio_path):
@@ -363,28 +540,31 @@ def procesar_todos_los_informes(directorio_path):
         Dict con contadores de cada tipo de informe procesado
     """
     resultados = {
-        'informes_z': {'procesados': 0, 'errores': 0},
-        'informes_rad': {'procesados': 0, 'errores': 0},
-        'informes_fot': {'procesados': 0, 'errores': 0}
+        'informes_z': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0, 'obs_not_found': 0}
     }
     
     # Primero procesamos los Informes-Z
     print(f"\n   📄 Procesando Informes-Z...")
-    z_proc, z_err = procesar_informes_z(directorio_path)
+    z_proc, z_err, z_obs_not_found = procesar_informes_z(directorio_path)
     resultados['informes_z']['procesados'] = z_proc
     resultados['informes_z']['errores'] = z_err
+    resultados['informes_z']['obs_not_found'] = z_obs_not_found
     
     # Luego procesamos los Informes-Radiante
     print(f"\n   🌟 Procesando Informes-Radiante...")
-    rad_proc, rad_err = procesar_informes_radiante(directorio_path)
+    rad_proc, rad_err, rad_obs_not_found = procesar_informes_radiante(directorio_path)
     resultados['informes_rad']['procesados'] = rad_proc
     resultados['informes_rad']['errores'] = rad_err
+    resultados['informes_rad']['obs_not_found'] = rad_obs_not_found
     
     # Finalmente procesamos los Informes-fotometria
     print(f"\n   📷 Procesando Informes-fotometria...")
-    fot_proc, fot_err = procesar_informes_fotometria(directorio_path)
+    fot_proc, fot_err, fot_obs_not_found = procesar_informes_fotometria(directorio_path)
     resultados['informes_fot']['procesados'] = fot_proc
     resultados['informes_fot']['errores'] = fot_err
+    resultados['informes_fot']['obs_not_found'] = fot_obs_not_found
     
     return resultados
 
@@ -396,10 +576,11 @@ def procesar_informes_z(directorio_path):
         directorio_path: Ruta al directorio a procesar
     
     Returns:
-        Tupla (procesados, errores) con contadores
+        Tupla (procesados, errores, obs_not_found) con contadores
     """
     procesados = 0
     errores = 0
+    obs_not_found = 0
     informes_encontrados = []
     
     try:
@@ -411,7 +592,7 @@ def procesar_informes_z(directorio_path):
         
         if not subdirectorios_trayectoria:
             print(f"   ⚠️  No se encontraron subdirectorios 'Trayectoria-*' en {directorio_path}")
-            return 0, 0
+            return 0, 0, 0
         
         for subdir_trayectoria in subdirectorios_trayectoria:
             # Buscar archivos que empiecen con "Informe-Z" y no terminen en ".kml"
@@ -421,7 +602,7 @@ def procesar_informes_z(directorio_path):
         
         if not informes_encontrados:
             print(f"   ⚠️  No se encontraron archivos Informe-Z válidos en {directorio_path}")
-            return 0, 0
+            return 0, 0, 0
         
         print(f"   📄 Encontrados {len(informes_encontrados)} archivo(s) Informe-Z")
         
@@ -429,6 +610,8 @@ def procesar_informes_z(directorio_path):
         for informe_path in informes_encontrados:
             try:
                 print(f"      • Procesando: {informe_path.parent.name}/{informe_path.name}")
+                if logger:
+                    logger.info(f"Procesando Informe-Z: {informe_path}")
                 
                 # Obtener la ruta del script CargaInformesZ.py
                 script_dir = Path(__file__).parent
@@ -447,10 +630,24 @@ def procesar_informes_z(directorio_path):
                     print(f"        ✅ Procesado correctamente")
                     if resultado.stdout:
                         print(f"           Salida: {resultado.stdout[:100]}")
+                    if logger:
+                        logger.info(f"  ✅ INSERTADO: {informe_path.name} - Procesado correctamente")
+                elif resultado.returncode == 2:
+                    # Código 2 indica observatorio no encontrado
+                    obs_not_found += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Observatorio no encontrado'
+                    print(f"        ⚠️  Observatorio NOT FOUND - Informe no insertado")
+                    if error_msg and "NOT FOUND" in error_msg:
+                        # Extraer el número de observatorio del mensaje
+                        print(f"           {error_msg[:150]}")
+                    if logger:
+                        logger.warning(f"  ⚠️ NO INSERTADO: {informe_path.name} - Observatorio NOT FOUND - {error_msg[:150]}")
                 else:
                     errores += 1
                     error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
                     print(f"        ❌ Error al procesar (código {resultado.returncode}): {error_msg[:300]}")
+                    if logger:
+                        logger.error(f"  ❌ NO INSERTADO: {informe_path.name} - Error (código {resultado.returncode}): {error_msg[:300]}")
                     
             except subprocess.TimeoutExpired:
                 errores += 1
@@ -461,9 +658,9 @@ def procesar_informes_z(directorio_path):
         
     except Exception as e:
         print(f"   ❌ Error al procesar directorio {directorio_path}: {e}")
-        return 0, 1
+        return 0, 1, 0
     
-    return procesados, errores
+    return procesados, errores, obs_not_found
 
 def procesar_informes_radiante(directorio_path):
     """
@@ -473,10 +670,11 @@ def procesar_informes_radiante(directorio_path):
         directorio_path: Ruta al directorio a procesar
     
     Returns:
-        Tupla (procesados, errores) con contadores
+        Tupla (procesados, errores, obs_not_found) con contadores
     """
     procesados = 0
     errores = 0
+    obs_not_found = 0
     informes_encontrados = []
     
     try:
@@ -488,7 +686,7 @@ def procesar_informes_radiante(directorio_path):
         
         if not informes_encontrados:
             print(f"      ⚠️  No se encontraron archivos Informe-Radiante en {directorio_path}")
-            return 0, 0
+            return 0, 0, 0
         
         print(f"      🌟 Encontrados {len(informes_encontrados)} archivo(s) Informe-Radiante")
         
@@ -496,6 +694,8 @@ def procesar_informes_radiante(directorio_path):
         for informe_path in informes_encontrados:
             try:
                 print(f"         • Procesando: {informe_path.name}")
+                if logger:
+                    logger.info(f"Procesando Informe-Radiante: {informe_path}")
                 
                 # Obtener la ruta del script CargaInformesRad.py
                 script_dir = Path(__file__).parent
@@ -512,10 +712,23 @@ def procesar_informes_radiante(directorio_path):
                 if resultado.returncode == 0:
                     procesados += 1
                     print(f"           ✅ Procesado correctamente")
+                    if logger:
+                        logger.info(f"  ✅ INSERTADO: {informe_path.name} - Procesado correctamente")
+                elif resultado.returncode == 2:
+                    # Código 2 indica observatorio no encontrado
+                    obs_not_found += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Observatorio no encontrado'
+                    print(f"           ⚠️  Observatorio NOT FOUND - Informe no insertado")
+                    if error_msg and "NOT FOUND" in error_msg:
+                        print(f"              {error_msg[:150]}")
+                    if logger:
+                        logger.warning(f"  ⚠️ NO INSERTADO: {informe_path.name} - Observatorio NOT FOUND - {error_msg[:150]}")
                 else:
                     errores += 1
                     error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
                     print(f"           ❌ Error al procesar (código {resultado.returncode}): {error_msg[:200]}")
+                    if logger:
+                        logger.error(f"  ❌ NO INSERTADO: {informe_path.name} - Error (código {resultado.returncode}): {error_msg[:200]}")
                     
             except subprocess.TimeoutExpired:
                 errores += 1
@@ -526,9 +739,9 @@ def procesar_informes_radiante(directorio_path):
         
     except Exception as e:
         print(f"      ❌ Error al procesar directorio {directorio_path}: {e}")
-        return 0, 1
+        return 0, 1, 0
     
-    return procesados, errores
+    return procesados, errores, obs_not_found
 
 def procesar_informes_fotometria(directorio_path):
     """
@@ -538,10 +751,11 @@ def procesar_informes_fotometria(directorio_path):
         directorio_path: Ruta al directorio a procesar
     
     Returns:
-        Tupla (procesados, errores) con contadores
+        Tupla (procesados, errores, obs_not_found) con contadores
     """
     procesados = 0
     errores = 0
+    obs_not_found = 0
     informes_encontrados = []
     
     try:
@@ -554,7 +768,7 @@ def procesar_informes_fotometria(directorio_path):
         
         if not informes_encontrados:
             print(f"      ⚠️  No se encontraron archivos Informe-fotometria en {directorio_path}")
-            return 0, 0
+            return 0, 0, 0
         
         print(f"      📷 Encontrados {len(informes_encontrados)} archivo(s) Informe-fotometria")
         
@@ -562,6 +776,8 @@ def procesar_informes_fotometria(directorio_path):
         for informe_path in informes_encontrados:
             try:
                 print(f"         • Procesando: {informe_path.name}")
+                if logger:
+                    logger.info(f"Procesando Informe-fotometria: {informe_path}")
                 
                 # Obtener la ruta del script CargaInformesFot_MySQL.py
                 script_dir = Path(__file__).parent
@@ -578,10 +794,23 @@ def procesar_informes_fotometria(directorio_path):
                 if resultado.returncode == 0:
                     procesados += 1
                     print(f"           ✅ Procesado correctamente")
+                    if logger:
+                        logger.info(f"  ✅ INSERTADO: {informe_path.name} - Procesado correctamente")
+                elif resultado.returncode == 2:
+                    # Código 2 indica observatorio no encontrado
+                    obs_not_found += 1
+                    error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Observatorio no encontrado'
+                    print(f"           ⚠️  Observatorio NOT FOUND - Informe no insertado")
+                    if error_msg and "NOT FOUND" in error_msg:
+                        print(f"              {error_msg[:150]}")
+                    if logger:
+                        logger.warning(f"  ⚠️ NO INSERTADO: {informe_path.name} - Observatorio NOT FOUND - {error_msg[:150]}")
                 else:
                     errores += 1
                     error_msg = resultado.stderr if resultado.stderr else resultado.stdout if resultado.stdout else 'Sin mensaje de error'
                     print(f"           ❌ Error al procesar (código {resultado.returncode}): {error_msg[:200]}")
+                    if logger:
+                        logger.error(f"  ❌ NO INSERTADO: {informe_path.name} - Error (código {resultado.returncode}): {error_msg[:200]}")
                     
             except subprocess.TimeoutExpired:
                 errores += 1
@@ -592,9 +821,9 @@ def procesar_informes_fotometria(directorio_path):
         
     except Exception as e:
         print(f"      ❌ Error al procesar directorio {directorio_path}: {e}")
-        return 0, 1
+        return 0, 1, 0
     
-    return procesados, errores
+    return procesados, errores, obs_not_found
 
 def seleccion_manual(directorios_pendientes):
     """
@@ -661,9 +890,9 @@ def seleccion_manual(directorios_pendientes):
     
     # Contadores globales
     totales = {
-        'informes_z': {'procesados': 0, 'errores': 0},
-        'informes_rad': {'procesados': 0, 'errores': 0},
-        'informes_fot': {'procesados': 0, 'errores': 0}
+        'informes_z': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0, 'obs_not_found': 0}
     }
     
     for directorio in directorios_a_procesar:
@@ -676,6 +905,7 @@ def seleccion_manual(directorios_pendientes):
         for tipo in totales:
             totales[tipo]['procesados'] += resultados[tipo]['procesados']
             totales[tipo]['errores'] += resultados[tipo]['errores']
+            totales[tipo]['obs_not_found'] += resultados[tipo]['obs_not_found']
     
     # Mostrar resumen detallado
     print("\n" + "=" * 50)
@@ -700,11 +930,154 @@ def seleccion_manual(directorios_pendientes):
     if totales['informes_fot']['errores'] > 0:
         print(f"   ❌ Con errores: {totales['informes_fot']['errores']}")
     
+    # Calcular total de informes no insertados por observatorio no encontrado
+    total_obs_not_found = sum(t['obs_not_found'] for t in totales.values())
+    
     print(f"\n📊 TOTALES:")
     print(f"   ✅ Total procesados: {total_procesados}")
     if total_errores > 0:
         print(f"   ❌ Total con errores: {total_errores}")
+    if total_obs_not_found > 0:
+        print(f"   ⚠️  Total no insertados (Observatorio NOT FOUND): {total_obs_not_found}")
     print(f"   📂 Directorios procesados: {len(directorios_a_procesar)}")
+
+def procesar_todos_sin_filtro(directorios_disponibles, modo_cron=False):
+    """
+    Procesa TODOS los directorios disponibles sin importar si ya fueron procesados.
+    Útil para recuperar detecciones no subidas o reprocesar.
+    
+    Args:
+        directorios_disponibles: Lista de directorios a procesar
+        modo_cron: Si True, no pide confirmación y usa logging detallado
+    """
+    print(f"\n🔄 PROCESANDO TODOS LOS DIRECTORIOS DISPONIBLES")
+    print("-" * 50)
+    print(f"Total de directorios a procesar: {len(directorios_disponibles)}")
+    
+    if logger:
+        logger.info(f"Iniciando procesamiento de {len(directorios_disponibles)} directorios")
+    
+    if not modo_cron:
+        # Confirmación antes de procesar todos
+        print(f"\n⚠️  Esto procesará {len(directorios_disponibles)} directorio(s).")
+        print("⚠️  NOTA: Se procesarán TODOS los directorios, incluso los ya procesados.")
+        print("      Los registros duplicados serán ignorados automáticamente.")
+        confirmacion = input("¿Deseas continuar? (s/n): ").strip().lower()
+        
+        if confirmacion != 's':
+            print("\n❌ Procesamiento cancelado por el usuario.")
+            return
+    else:
+        # En modo cron, procesar directamente sin confirmación
+        print("\n⚠️  Modo CRON activo: procesando sin confirmación")
+        if logger:
+            logger.info("Modo CRON: Procesamiento automático sin confirmación")
+    
+    print("\n" + "=" * 50)
+    
+    # Contadores globales
+    totales = {
+        'informes_z': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0, 'obs_not_found': 0}
+    }
+    
+    directorios_con_errores = []
+    
+    for i, directorio in enumerate(directorios_disponibles, 1):
+        print(f"\n📂 [{i}/{len(directorios_disponibles)}] Procesando: {directorio['fecha_formato']} {directorio['hora_formato']}")
+        print(f"   Ruta: {directorio['ruta']}")
+        
+        try:
+            resultados = procesar_todos_los_informes(directorio['ruta'])
+            
+            # Acumular resultados
+            for tipo in totales:
+                totales[tipo]['procesados'] += resultados[tipo]['procesados']
+                totales[tipo]['errores'] += resultados[tipo]['errores']
+                totales[tipo]['obs_not_found'] += resultados[tipo]['obs_not_found']
+            
+            # Registrar si hubo errores
+            total_errores_dir = sum(resultados[tipo]['errores'] for tipo in resultados)
+            if total_errores_dir > 0:
+                directorios_con_errores.append({
+                    'directorio': directorio['fecha_formato'] + ' ' + directorio['hora_formato'],
+                    'errores': total_errores_dir
+                })
+            
+        except Exception as e:
+            print(f"   ❌ Error procesando directorio: {e}")
+            directorios_con_errores.append({
+                'directorio': directorio['fecha_formato'] + ' ' + directorio['hora_formato'],
+                'errores': 1
+            })
+        
+        # Mostrar progreso
+        porcentaje = (i / len(directorios_disponibles)) * 100
+        print(f"\n   Progreso total: {porcentaje:.1f}%")
+    
+    # Mostrar resumen detallado
+    print("\n" + "=" * 50)
+    print("RESUMEN DEL PROCESAMIENTO")
+    print("=" * 50)
+    
+    total_procesados = sum(t['procesados'] for t in totales.values())
+    total_errores = sum(t['errores'] for t in totales.values())
+    
+    print(f"\n📄 Informes-Z:")
+    print(f"   ✅ Procesados: {totales['informes_z']['procesados']}")
+    if totales['informes_z']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_z']['errores']}")
+    
+    print(f"\n🌟 Informes-Radiante:")
+    print(f"   ✅ Procesados: {totales['informes_rad']['procesados']}")
+    if totales['informes_rad']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_rad']['errores']}")
+    
+    print(f"\n📷 Informes-fotometria:")
+    print(f"   ✅ Procesados: {totales['informes_fot']['procesados']}")
+    if totales['informes_fot']['errores'] > 0:
+        print(f"   ❌ Con errores: {totales['informes_fot']['errores']}")
+    
+    # Calcular total de informes no insertados por observatorio no encontrado
+    total_obs_not_found = sum(t['obs_not_found'] for t in totales.values())
+    
+    print(f"\n📊 TOTALES:")
+    print(f"   ✅ Total procesados: {total_procesados}")
+    if total_errores > 0:
+        print(f"   ❌ Total con errores: {total_errores}")
+    if total_obs_not_found > 0:
+        print(f"   ⚠️  Total no insertados (Observatorio NOT FOUND): {total_obs_not_found}")
+    print(f"   📂 Directorios procesados: {len(directorios_disponibles)}")
+    
+    if directorios_con_errores:
+        print(f"\n⚠️  Directorios con errores ({len(directorios_con_errores)}):")
+        for dir_err in directorios_con_errores[:10]:  # Mostrar hasta 10
+            print(f"   • {dir_err['directorio']}: {dir_err['errores']} error(es)")
+        if len(directorios_con_errores) > 10:
+            print(f"   ... y {len(directorios_con_errores) - 10} directorios más con errores")
+    
+    print(f"\n✅ Procesamiento completado.")
+    
+    # Logging del resumen final
+    if logger:
+        logger.info("="*80)
+        logger.info("RESUMEN FINAL DEL PROCESAMIENTO")
+        logger.info(f"Total de directorios procesados: {len(directorios_disponibles)}")
+        logger.info(f"Informes-Z procesados: {totales['informes_z']['procesados']}")
+        logger.info(f"Informes-Z con errores: {totales['informes_z']['errores']}")
+        logger.info(f"Informes-Z no insertados (Observatorio NOT FOUND): {totales['informes_z']['obs_not_found']}")
+        logger.info(f"Informes-Radiante procesados: {totales['informes_rad']['procesados']}")
+        logger.info(f"Informes-Radiante con errores: {totales['informes_rad']['errores']}")
+        logger.info(f"Informes-Radiante no insertados (Observatorio NOT FOUND): {totales['informes_rad']['obs_not_found']}")
+        logger.info(f"Informes-fotometria procesados: {totales['informes_fot']['procesados']}")
+        logger.info(f"Informes-fotometria con errores: {totales['informes_fot']['errores']}")
+        logger.info(f"Informes-fotometria no insertados (Observatorio NOT FOUND): {totales['informes_fot']['obs_not_found']}")
+        logger.info(f"TOTAL procesados: {total_procesados}")
+        logger.info(f"TOTAL con errores: {total_errores}")
+        logger.info(f"TOTAL no insertados (Observatorio NOT FOUND): {total_obs_not_found}")
+        logger.info("="*80)
+        logger.info("FIN DEL PROCESAMIENTO")
 
 def procesar_todos(directorios_pendientes):
     """
@@ -726,9 +1099,9 @@ def procesar_todos(directorios_pendientes):
     
     # Contadores globales
     totales = {
-        'informes_z': {'procesados': 0, 'errores': 0},
-        'informes_rad': {'procesados': 0, 'errores': 0},
-        'informes_fot': {'procesados': 0, 'errores': 0}
+        'informes_z': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_rad': {'procesados': 0, 'errores': 0, 'obs_not_found': 0},
+        'informes_fot': {'procesados': 0, 'errores': 0, 'obs_not_found': 0}
     }
     
     for i, directorio in enumerate(directorios_pendientes, 1):
@@ -741,6 +1114,7 @@ def procesar_todos(directorios_pendientes):
         for tipo in totales:
             totales[tipo]['procesados'] += resultados[tipo]['procesados']
             totales[tipo]['errores'] += resultados[tipo]['errores']
+            totales[tipo]['obs_not_found'] += resultados[tipo]['obs_not_found']
         
         # Mostrar progreso
         porcentaje = (i / len(directorios_pendientes)) * 100
@@ -769,10 +1143,15 @@ def procesar_todos(directorios_pendientes):
     if totales['informes_fot']['errores'] > 0:
         print(f"   ❌ Con errores: {totales['informes_fot']['errores']}")
     
+    # Calcular total de informes no insertados por observatorio no encontrado
+    total_obs_not_found = sum(t['obs_not_found'] for t in totales.values())
+    
     print(f"\n📊 TOTALES:")
     print(f"   ✅ Total procesados: {total_procesados}")
     if total_errores > 0:
         print(f"   ❌ Total con errores: {total_errores}")
+    if total_obs_not_found > 0:
+        print(f"   ⚠️  Total no insertados (Observatorio NOT FOUND): {total_obs_not_found}")
     print(f"   📂 Directorios procesados: {len(directorios_pendientes)}")
     print(f"\n✅ Procesamiento completado.")
 
@@ -792,12 +1171,28 @@ def main():
              'Ejemplo: /Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones\n'
              'Si no se proporciona, se usa la ruta predeterminada relativa al script.'
     )
+    parser.add_argument(
+        '--cron',
+        action='store_true',
+        help='Ejecutar en modo automático para cron (procesa todos sin confirmación y genera log)'
+    )
     
     args = parser.parse_args()
     
-    print("=" * 50)
-    print("SCRIPT DE LECTURA DE TABLA METEOROS")
-    print("=" * 50)
+    # Configurar logging según el modo
+    log_file = configurar_logging(modo_cron=args.cron)
+    
+    # Si estamos en modo cron, ejecutar directamente la opción 3
+    if args.cron:
+        print("=" * 50)
+        print("MODO CRON: PROCESAMIENTO AUTOMÁTICO")
+        print("=" * 50)
+        if log_file:
+            print(f"Archivo de log: {log_file}")
+    else:
+        print("=" * 50)
+        print("SCRIPT DE LECTURA DE TABLA METEOROS")
+        print("=" * 50)
     
     # Mostrar información de configuración
     print(f"\n🔧 Usando configuración desde: config_db.py")
@@ -826,10 +1221,58 @@ def main():
     
     if conexion:
         try:
+            # Si estamos en modo cron, ejecutar directamente la opción 3
+            if args.cron:
+                print("\n🔍 Analizando TODOS los directorios disponibles para procesamiento automático...")
+                todos_directorios, info_todos = obtener_todos_directorios(
+                    ruta_base=args.ruta_base if args.ruta_base else None
+                )
+                
+                if todos_directorios:
+                    if logger:
+                        logger.info(f"Encontrados {len(todos_directorios)} directorios para procesar")
+                    # Procesar todos sin pedir confirmación
+                    procesar_todos_sin_filtro(todos_directorios, modo_cron=True)
+                else:
+                    print("\n⚠️  No se encontraron directorios para procesar")
+                    if logger:
+                        logger.warning("No se encontraron directorios para procesar")
+                
+                # Salir después de procesar en modo cron
+                return
+            
+            # Modo interactivo normal
             # Obtener última fecha y hora
             fecha, hora = obtener_ultima_fecha_hora(conexion)
             
-            if fecha is not None and hora is not None:
+            if fecha is None and hora is None:
+                # No hay registros en la base de datos
+                print("\n⚠️  No se encontraron registros en la tabla Meteoro")
+                print("🔄 Se procesarán TODOS los directorios disponibles...")
+                
+                # Obtener TODOS los directorios
+                print("\n🔍 Analizando todos los directorios disponibles...")
+                todos_directorios, info_todos = obtener_todos_directorios(
+                    ruta_base=args.ruta_base if args.ruta_base else None
+                )
+                
+                if todos_directorios:
+                    mostrar_todos_directorios(todos_directorios, info_todos)
+                    
+                    # Preguntar si desea procesar todos
+                    print("\n" + "=" * 50)
+                    print("📂 No hay registros previos en la base de datos")
+                    print("=" * 50)
+                    confirmacion = input("\n¿Deseas procesar todos los directorios encontrados? (s/n): ").strip().lower()
+                    
+                    if confirmacion == 's':
+                        procesar_todos_sin_filtro(todos_directorios, modo_cron=False)
+                    else:
+                        print("\n❌ Procesamiento cancelado por el usuario")
+                else:
+                    print("\n⚠️  No se encontraron directorios para procesar")
+            
+            elif fecha is not None and hora is not None:
                 print(f"\nÚltimo registro encontrado:")
                 print(f"Fecha original: {fecha}")
                 print(f"Hora original: {hora}")
@@ -868,32 +1311,57 @@ def main():
                         ruta_base=args.ruta_base if args.ruta_base else None
                     )
                     
-                    if info and mostrar_directorios_pendientes(directorios_pendientes, info):
-                        # Solo mostrar menú si hay directorios pendientes
-                        while True:
-                            mostrar_menu()
+                    # Mostrar directorios pendientes (si los hay)
+                    hay_pendientes = info and mostrar_directorios_pendientes(directorios_pendientes, info)
+                    
+                    # Mostrar menú siempre (incluso si no hay pendientes, para permitir opción 3)
+                    while True:
+                        mostrar_menu()
+                        
+                        try:
+                            opcion = input("\nSelecciona una opción (1-4): ").strip()
                             
-                            try:
-                                opcion = input("\nSelecciona una opción (1-3): ").strip()
-                                
-                                if opcion == '1':
+                            if opcion == '1':
+                                if hay_pendientes:
                                     seleccion_manual(directorios_pendientes)
-                                    break
-                                elif opcion == '2':
-                                    procesar_todos(directorios_pendientes)
-                                    break
-                                elif opcion == '3':
-                                    print("\n👋 Saliendo del programa...")
-                                    break
                                 else:
-                                    print("❌ Opción no válida. Por favor, selecciona 1, 2 o 3.")
-                                    
-                            except KeyboardInterrupt:
-                                print("\n\n👋 Programa interrumpido por el usuario.")
+                                    print("\n⚠️  No hay directorios pendientes para seleccionar.")
+                                    print("     Puedes usar la opción 3 para procesar todos los directorios.")
+                                    continue
                                 break
-                            except Exception as e:
-                                print(f"❌ Error inesperado: {e}")
+                            elif opcion == '2':
+                                if hay_pendientes:
+                                    procesar_todos(directorios_pendientes)
+                                else:
+                                    print("\n⚠️  No hay directorios pendientes para procesar.")
+                                    print("     Puedes usar la opción 3 para procesar todos los directorios.")
+                                    continue
                                 break
+                            elif opcion == '3':
+                                # Obtener TODOS los directorios sin filtro de fecha
+                                print("\n🔍 Analizando TODOS los directorios disponibles...")
+                                todos_directorios, info_todos = obtener_todos_directorios(
+                                    ruta_base=args.ruta_base if args.ruta_base else None
+                                )
+                                
+                                if todos_directorios:
+                                    mostrar_todos_directorios(todos_directorios, info_todos)
+                                    procesar_todos_sin_filtro(todos_directorios)
+                                else:
+                                    print("\n⚠️  No se encontraron directorios para procesar.")
+                                break
+                            elif opcion == '4':
+                                print("\n👋 Saliendo del programa...")
+                                break
+                            else:
+                                print("❌ Opción no válida. Por favor, selecciona 1, 2, 3 o 4.")
+                                
+                        except KeyboardInterrupt:
+                            print("\n\n👋 Programa interrumpido por el usuario.")
+                            break
+                        except Exception as e:
+                            print(f"❌ Error inesperado: {e}")
+                            break
                 
         finally:
             # Cerrar conexión

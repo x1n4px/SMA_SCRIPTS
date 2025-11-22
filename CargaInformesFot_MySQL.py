@@ -84,9 +84,9 @@ try:
             idInf = resultado[0][0]
 
         if infNuevo:
-            cursor.execute("SELECT COUNT(*) FROM Informe_Fotometria")
+            cursor.execute("SELECT MAX(Identificador) FROM Informe_Fotometria")
             resultado = cursor.fetchone()
-            idInf = resultado[0] + 1
+            idInf = (resultado[0] + 1) if resultado[0] is not None else 1
 
         if infNuevo:
             if len(sys.argv) == 1:
@@ -113,7 +113,7 @@ try:
             if insertar:
                 cursor.execute("SELECT MAX(Identificador) FROM Meteoro")
                 resultado = cursor.fetchone()
-                idM = 1 if resultado[0] is None else resultado[0] + 1
+                idM = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Meteoro (Identificador, Fecha, Hora) VALUES (%s, %s, %s)"
                 cursor.execute(insert, (idM, fecha, hora))
                 cnxn.commit()
@@ -216,9 +216,9 @@ try:
             aux = lineasarchivo[actual].split(':')
             masaFotometrica = aux[len(aux)-1][1:]
 
-            cursor.execute("SELECT COUNT(*) FROM Informe_Fotometria")
+            cursor.execute("SELECT MAX(Identificador) FROM Informe_Fotometria")
             resultado = cursor.fetchone()
-            idInf = resultado[0] + 1
+            idInf = (resultado[0] + 1) if resultado[0] is not None else 1
             
             insert = """INSERT INTO Informe_Fotometria 
                        (Identificador, Fecha, Hora, Estrellas_visibles, 
@@ -238,9 +238,9 @@ try:
             cnxn.commit()
 
             for i in estrellasRegresion:
-                cursor.execute("SELECT COUNT(*) FROM Estrellas_usadas_para_regresión")
+                cursor.execute("SELECT MAX(Identificador) FROM Estrellas_usadas_para_regresión")
                 resultado = cursor.fetchone()
-                idStar = resultado[0] + 1
+                idStar = (resultado[0] + 1) if resultado[0] is not None else 1
                 idEstrella = f"{i[0]} {i[1]}"
                 insert = """INSERT INTO Estrellas_usadas_para_regresión 
                            (Identificador, Id_estrella, Masa_de_aire, Magnitud_de_catalogo, 

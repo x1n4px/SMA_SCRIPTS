@@ -85,9 +85,9 @@ try:
                 idInf = i[0]
 
         if infNuevo:
-            cursor.execute("SELECT COUNT(*) FROM Informe_Radiante")
-            for i in cursor:
-                idInf = i[0] + 1
+            cursor.execute("SELECT MAX(Identificador) FROM Informe_Radiante")
+            resultado = cursor.fetchone()
+            idInf = (resultado[0] + 1) if resultado[0] is not None else 1
 
         if infNuevo:
             if len(sys.argv) == 1:
@@ -112,10 +112,9 @@ try:
                             insertar = False
 
             if insertar:
-                cursor.execute("SELECT * FROM Meteoro")
-                idM = 1
-                for i in cursor:
-                    idM = i[0] + 1
+                cursor.execute("SELECT MAX(Identificador) FROM Meteoro")
+                resultado = cursor.fetchone()
+                idM = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Meteoro (Identificador, Fecha, Hora) VALUES (%s, %s, %s)"
                 cursor.execute(insert, (idM, fecha, hora))
 
@@ -154,9 +153,9 @@ try:
             if lineasarchivo[actual][:2] == "No":
                 lluviaAsociada = "Ninguna"
 
-                cursor.execute("SELECT COUNT(*) FROM Informe_Radiante")
-                for i in cursor:
-                    idInf = i[0] + 1
+                cursor.execute("SELECT MAX(Identificador) FROM Informe_Radiante")
+                resultado = cursor.fetchone()
+                idInf = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Informe_Radiante (Identificador, Fecha, Hora, Velocidad_Lluvia_Asociada, Trayectorias_estimadas_para, Distancia_angular_radianes, Distancia_angular_grados, Velocidad_angular_grad_sec, Meteoro_Identificador, Observatorio_Número, Lluvia_Asociada) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert, (idInf, fecha, hora, None, 'No medido', None, None, None, idM, obsv, idLluviaAsociada))
 
@@ -219,9 +218,9 @@ try:
                         actual = actual + 1
 
                     #Añadimos los datos del informe
-                    cursor.execute("SELECT COUNT(*) FROM Informe_Radiante")
-                    for i in cursor:
-                        idInf = i[0] + 1
+                    cursor.execute("SELECT MAX(Identificador) FROM Informe_Radiante")
+                    resultado = cursor.fetchone()
+                    idInf = (resultado[0] + 1) if resultado[0] is not None else 1
                     insert = "INSERT INTO Informe_Radiante (Identificador, Fecha, Hora, Velocidad_Lluvia_Asociada, Trayectorias_estimadas_para, Distancia_angular_radianes, Distancia_angular_grados, Velocidad_angular_grad_sec, Meteoro_Identificador, Observatorio_Número, Lluvia_Asociada) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                     cursor.execute(insert, (idInf, fecha, hora, str(velLluviaAsociada), str(tiempoTrayectorias), Decimal(distAngular[0]), Decimal(distAngular[1]), Decimal(velAngular), idM, obsv, idLluviaAsociada))
 
@@ -264,9 +263,9 @@ try:
                         actual = actual + 1
 
                     #Añadimos los datos del informe
-                    cursor.execute("SELECT COUNT(*) FROM Informe_Radiante")
-                    for i in cursor:
-                        idInf = i[0] + 1
+                    cursor.execute("SELECT MAX(Identificador) FROM Informe_Radiante")
+                    resultado = cursor.fetchone()
+                    idInf = (resultado[0] + 1) if resultado[0] is not None else 1
                     insert = "INSERT INTO Informe_Radiante (Identificador, Fecha, Hora, Velocidad_Lluvia_Asociada, Trayectorias_estimadas_para, Distancia_angular_radianes, Distancia_angular_grados, Velocidad_angular_grad_sec, Meteoro_Identificador, Observatorio_Número, Lluvia_Asociada) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                     cursor.execute(insert, (idInf, fecha, hora, str(velLluviaAsociada), str(tiempoTrayectorias), None, None, None, idM, obsv, idLluviaAsociada))
 

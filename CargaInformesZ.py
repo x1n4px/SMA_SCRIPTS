@@ -119,9 +119,9 @@ try:
             if infNuevo:
                 if len(sys.argv) == 1:
                     print(ruta + "/" + informe)
-                cursor.execute("SELECT COUNT(*) FROM Informe_Z")
+                cursor.execute("SELECT MAX(IdInforme) FROM Informe_Z")
                 resultado = cursor.fetchone()
-                idInf = resultado[0] + 1 if resultado else 1
+                idInf = (resultado[0] + 1) if resultado[0] is not None else 1
 
             # Sacamos valores de la estación 1
             aux = lineasarchivo[actual][40:].split(":")
@@ -131,9 +131,8 @@ try:
             # Verificar que el observatorio existe
             cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion1,))
             if not cursor.fetchone():
-                print(f"  ⚠ Advertencia: Observatorio {num_estacion1} no existe. Creando...")
-                cursor.execute("INSERT INTO Observatorio (Número, Nombre_Camara, Nombre_Observatorio) VALUES (%s, %s, %s)", 
-                              (num_estacion1, f"Observatorio_{num_estacion1}", f"Observatorio_{num_estacion1}"))
+                print(f"ERROR: Observatorio NOT FOUND - {num_estacion1}")
+                sys.exit(2)  # Código de salida 2 indica observatorio no encontrado
             
             estacion1.append(num_estacion1) # Numero
 
@@ -155,9 +154,8 @@ try:
             # Verificar que el observatorio existe
             cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion2,))
             if not cursor.fetchone():
-                print(f"  ⚠ Advertencia: Observatorio {num_estacion2} no existe. Creando...")
-                cursor.execute("INSERT INTO Observatorio (Número, Nombre_Camara, Nombre_Observatorio) VALUES (%s, %s, %s)", 
-                              (num_estacion2, f"Observatorio_{num_estacion2}", f"Observatorio_{num_estacion2}"))
+                print(f"ERROR: Observatorio NOT FOUND - {num_estacion2}")
+                sys.exit(2)  # Código de salida 2 indica observatorio no encontrado
             
             estacion2.append(num_estacion2) # Numero
 
@@ -382,9 +380,9 @@ try:
             actual = actual + 6
 
             if infNuevo:
-                cursor.execute("SELECT COUNT(*) FROM Ecuacion_parametrica")
+                cursor.execute("SELECT MAX(IdEc) FROM Ecuacion_parametrica")
                 resultado = cursor.fetchone()
-                idEc = resultado[0] + 1 if resultado else 1
+                idEc = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Ecuacion_parametrica (IdEc, a, b, c, Inicio_Estacion_1, Fin_Estacion_1, Inicio_Estacion_2, Fin_Estacion_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert, (idEc, Decimal(ecParam[0]), Decimal(ecParam[1]), Decimal(ecParam[2]),
                                        ptsEst1ParamInicio[0] + " " + ptsEst1ParamInicio[1] + " " + ptsEst1ParamInicio[2],
@@ -393,9 +391,9 @@ try:
                                        ptsEst2ParamFinal[0] + " " + ptsEst2ParamFinal[1] + " " + ptsEst2ParamFinal[2]))
         else:
             if infNuevo:
-                cursor.execute("SELECT COUNT(*) FROM Ecuacion_parametrica")
+                cursor.execute("SELECT MAX(IdEc) FROM Ecuacion_parametrica")
                 resultado = cursor.fetchone()
-                idEc = resultado[0] + 1 if resultado else 1
+                idEc = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Ecuacion_parametrica (IdEc, a, b, c, Inicio_Estacion_1, Fin_Estacion_1, Inicio_Estacion_2, Fin_Estacion_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert, (idEc, None, None, None, None, None, None, None))
             

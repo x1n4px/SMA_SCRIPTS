@@ -1,0 +1,18 @@
+Informe del meteoro del 2025-09-21T02:52:45.8032 captado desde observatorio 80:
+
+Comando ejecutado:
+radiante.pl 2025-09-21T02:52:45.8032 80 704 1654 356 1381
+
+Lluvias activa a la fecha:
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+Táuridas Sur
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+  SPE |   60.20 |   41.20 |  319.066613 |  62.372916 |    58.921
+  DSX |  146.00 |    0.00 |  345.399029 |   4.904504 |    19.986
+  STA |   18.60 |    5.20 |  167.162409 |   2.372974 |    32.305
+
+No asociado a ninguna lluvia.

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+  <name>Informe-Z-20250912025112-59-97.kml</name>
+  <open>1</open>
+  <Style id="sn_ylw-pushpin">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+  <Style id="sn_ylw-pushpin0">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+  <Placemark>
+    <name>Inicio</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>0.786447222222222,38.0656972222222,97313</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>Fin</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>0.773144444444445,38.0121722222222,84927</coordinates>
+    </Point>
+  </Placemark>
+	 <Style id="sn_ylw-pushpin">
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>2</width>
+		</LineStyle>
+	</Style>
+	<Placemark>
+		<name>Trayectoria</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>
+				0.786447222222222,38.0656972222222,97313 0.773144444444445,38.0121722222222,84927 
+			</coordinates>
+		</LineString>
+	</Placemark>
+  <Placemark>
+    <name>Impacto</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>0.680966666666667,37.6390444444444,0</coordinates>
+    </Point>
+  </Placemark>
+</Document>
+</kml>

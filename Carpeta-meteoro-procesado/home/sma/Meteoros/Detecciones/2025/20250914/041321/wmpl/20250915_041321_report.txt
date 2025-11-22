@@ -1,0 +1,175 @@
+Input measurement type: Right Ascension for meas1, Declination for meas2, epoch of date
+
+Reference JD: 2460933.675948989578
+Time: 2025-09-15 04:13:21.992700 UTC
+
+
+Plane intersections
+-------------------
+Intersection 1 - Stations: Ager 26 and Segorbe 63
+ Convergence angle = 61.18788 deg
+ R.A. =  98.18761  Dec = +49.74502 deg
+Intersection 2 - Stations: Ager 26 and Zaragoza 93
+ Convergence angle = 42.00474 deg
+ R.A. =  98.09852  Dec = +49.71939 deg
+Intersection 3 - Stations: Segorbe 63 and Zaragoza 93
+ Convergence angle = 19.18320 deg
+ R.A. =  98.20446  Dec = +49.87293 deg
+
+Best intersection: Stations Ager 26 and Segorbe 63 with Qconv = 61.19 deg
+
+
+Least squares solution
+----------------------
+State vector (ECI, epoch of date):
+ X =   2642073.48 m
+ Y =   4141411.68 m
+ Z =   4214289.91 m
+ Vx =    -5737.95 m/s
+ Vy =    42122.12 m/s
+ Vz =    50447.12 m/s
+
+Timing offsets (from input data):
+       Ager 26: 0.000000 s
+    Segorbe 63: -0.017191 s
+   Zaragoza 93: -0.158582 s
+
+Reference point on the trajectory:
+  Time: 2025-09-15 04:13:21.992700 UTC
+  Lat      =   40.813044 deg
+  Lon      =   -0.263389 deg
+  Ht MSL   =   103312.56 m
+  Ht WGS84 =   103364.16 m
+  Lat geo =   40.625804 deg
+
+  JD dynamic   = 2460933.676749730483 
+  LST apparent = 57.4635714961 deg
+Radiant (apparent in ECI which includes Earth's rotation, epoch of date):
+  R.A.      =  97.75719 deg
+  Dec       = +49.87959 deg
+  Azimuth   =  58.28721 deg
+  Elevation = +60.66760 deg
+  Vavg      =  65.34010 km/s
+  Vinit     =  65.97052 km/s
+  Vstddev   =   0.00947 km/s (direct fit)
+Radiant (apparent ground-fixed, epoch of date):
+  R.A.      =  98.12344 deg
+  Dec       = +49.72550 deg
+  Azimuth   =  58.61793 deg
+  Elevation = +60.43698 deg
+  Vavg      =  65.49018 km/s
+  Vinit     =  66.12060 km/s
+Radiant (geocentric, J2000):
+  R.A.   =  97.59437 deg
+  Dec    = +49.90879 deg
+  Vg     =  65.03033 km/s
+  Vinf   =  65.97052 km/s
+  Zc     =  29.43122 deg
+  Zg     =  29.64722 deg
+Radiant (ecliptic geocentric, J2000):
+  Lg     =  95.46276 deg
+  Bg     = +26.61500 deg
+  Vh     =  41.73807 km/s
+Radiant (ecliptic heliocentric, J2000):
+  Lh     = 107.70301 deg
+  Bh     = +44.26964 deg
+  Vh_x   =   9.08815 km/s
+  Vh_y   = -28.47179 km/s
+  Vh_z   = -29.13467 km/s
+Orbit:
+  La Sun = 172.234977 deg
+  a      =  40.044689 AU
+  e      =   0.977294
+  i      = 132.804367 deg
+  peri   = 143.704862 deg
+  node   = 172.236384 deg
+  Pi     = 315.941246 deg
+  b      =  25.740564 deg
+  q      =   0.909252 AU
+  f      =  36.293977 deg
+  M      =   0.094579 deg
+  Q      =  79.180127 AU
+  n      =   0.003889 deg/day
+  T      = 253.406663 years
+  Last perihelion JD = 2460909.3600
+  Last perihelion dt = 2025-08-21 20:38:22
+  Tj     =  -0.668797
+Shower association:
+  IAU No.  =  424
+  IAU code =  SOL
+
+Jacchia fit on lag = -|a1|*exp(|a2|*t):
+ a1 = 0.008582
+ a2 = 29.809389
+
+Mean time residuals from time vs. length:
+  Station with reference time: Ager 26
+  Avg. res. = 7.436e-06 s
+  Stddev    = 2.73e-03 s
+
+
+Begin point on the trajectory:
+  Lat (+N) =   40.813044 deg
+  Lon (+E) =   -0.263389 deg
+  Ht MSL   =   103312.56 m
+  Ht WGS84 =   103364.16 m
+
+End point on the trajectory:
+  Lat (+N) =   40.757268 deg
+  Lon (+E) =   -0.383559 deg
+  Ht MSL   =    82105.57 m
+  Ht WGS84 =    82157.49 m
+
+Lowest point on the trajectory:
+  Lat (+N) =   40.757268 deg
+  Lon (+E) =   -0.383559 deg
+  Ht MSL   =    82105.57 m
+  Ht WGS84 =    82157.49 m
+
+Stations
+--------
+            ID, Ignored, Lon +E (deg), Lat +N (deg),  Ht (m), Jacchia a1, Jacchia a2,  Beg Ht (m),  End Ht (m), +/- Obs ang (deg), +/- V (m), +/- H (m), Persp. angle (deg), Weight, FOV Beg, FOV End, Comment
+       Ager 26,   False,     0.744033,    42.017628,  736.00,   0.000000,   0.000000,   103312.56,    83601.19,          0.000231,      0.40,      0.64,              83.60, 0.9876,    None,    None, 
+    Segorbe 63,   False,    -0.396900,    39.759000,  261.00,   1.386742,  16.578730,    95745.48,    82105.57,          0.329663,    400.83,    725.10,              37.12, 0.3642,    None,    None, 
+   Zaragoza 93,   False,    -0.927381,    41.641700,  271.00,  74.145519,   0.000000,    95690.14,    83708.18,          0.000693,      0.30,      1.67,              52.90, 0.6362,    None,    None, 
+
+Points
+------
+ No,     Station ID,  Ignore,  Time (s),                   JD,     meas1,     meas2, Azim +E of due N (deg), Alt (deg), Azim line (deg), Alt line (deg), RA obs (deg), Dec obs (deg), RA line (deg), Dec line (deg),       X (m),       Y (m),       Z (m), Latitude (deg), Longitude (deg), Height (m),  Range (m), Length (m), State vect dist (m),   Lag (m), Vel (m/s), Vel prev avg (m/s), H res (m), V res (m), Ang res (asec), AppMag, AbsMag
+  0,        Ager 26,       0,  0.000000, 2460933.675948989578,  30.89585, -10.11767,              212.52605,  32.05390,       212.52590,       32.05387,     30.89585,     -10.11767,      30.89596,      -10.11775,  2642073.48,  4141411.68,  4214289.91,      40.813044,       -0.263389,  103312.56,  189527.53,       0.00,                0.00,     89.94,      0.00,           63675.27,      0.38,      0.23,           0.48,   None,   None
+  1,        Ager 26,       0,  0.050000, 2460933.675949568395,  30.30482, -10.89133,              212.77870,  31.11054,       212.77870,       31.11054,     30.30482,     -10.89133,      30.30503,      -10.89133,  2642352.48,  4139363.55,  4211836.99,      40.805720,       -0.279194,  100516.24,  189193.66,    3207.72,             3207.72,     -0.86,  64154.44,           63675.27,     -0.00,     -0.00,           0.00,   None,   None
+  2,        Ager 26,       0,  0.100000, 2460933.675950147212,  29.70530, -11.67085,              213.02861,  30.15813,       213.02872,       30.15816,     29.70530,     -11.67085,      29.70564,      -11.67079,  2642633.08,  4137303.51,  4209369.81,      40.798346,       -0.295100,   97704.04,  188912.39,    6434.09,             6434.09,    -73.02,  64527.31,           63675.27,     -0.28,     -0.17,           0.36,   None,   None
+  3,        Ager 26,       0,  0.150000, 2460933.675950725563,  29.12393, -12.42144,              213.26509,  29.23919,       213.26548,       29.23927,     29.12393,     -12.42144,      29.12427,      -12.42123,  2642902.94,  4135322.24,  4206996.97,      40.791245,       -0.310415,   94999.73,  188694.06,    9537.09,             9537.09,   -268.55,  62060.03,           63675.27,     -0.98,     -0.61,           1.26,   None,   None
+  4,        Ager 26,       0,  0.200000, 2460933.675951304380,  28.44521, -13.29069,              213.53418,  28.17254,       213.53417,       28.17254,     28.44521,     -13.29069,      28.44606,      -13.29070,  2643215.45,  4133027.82,  4204249.09,      40.783012,       -0.328130,   91868.43,  188503.70,   13130.54,            13130.54,     26.37,  71868.98,           65180.89,      0.04,      0.02,           0.05,   None,   None
+  5,        Ager 26,       0,  0.250000, 2460933.675951883197,  27.82189, -14.08198,              213.77498,  27.19918,       213.77501,       27.19918,     27.82189,     -14.08198,      27.82291,      -14.08196,  2643499.97,  4130938.81,  4201747.22,      40.775507,       -0.344288,   89017.87,  188390.82,   16402.28,            16402.28,     -0.41,  65434.83,           65647.34,     -0.07,     -0.05,           0.10,   None,   None
+  6,        Ager 26,       0,  0.300000, 2460933.675952462014,  27.15851, -14.91639,              214.02492,  26.17017,       214.02473,       26.17014,     27.15851,     -14.91639,      27.15990,      -14.91649,  2643800.37,  4128733.06,  4199105.54,      40.767573,       -0.361348,   86008.47,  188333.04,   19856.84,            19856.84,    155.63,  69091.28,           66182.92,      0.47,      0.29,           0.61,   None,   None
+  7,        Ager 26,       0,  0.350000, 2460933.675953040365,  26.62365, -15.58310,              214.22187,  25.34596,       214.22240,       25.34606,     26.62365,     -15.58310,      26.62470,      -15.58280,  2644040.68,  4126968.42,  4196992.16,      40.761219,       -0.375047,   83601.19,  188334.35,   22620.56,            22620.56,   -379.18,  55274.37,           65497.04,     -1.38,     -0.86,           1.78,   None,   None
+  0,     Segorbe 63,       0,  0.131109, 2460933.675950497855, 163.55615,  86.64540,                4.13116,  38.74786,         3.81485,       38.94858,    163.55615,     +86.64540,     161.47737,      +86.94117,  2642828.53,  4135868.63,  4207651.34,      40.793204,       -0.306166,   95745.48,  150214.78,       0.00,             8681.37,    122.00,      0.00,           63906.79,   -729.30,    402.73,        1143.98,   None,   None
+  1,     Segorbe 63,       0,  0.181109, 2460933.675951076206, 177.63957,  86.84374,                3.46362,  38.11404,         3.14375,       38.31587,    177.63957,     +86.84374,     176.91657,      +87.16385,  2643120.53,  4133724.76,  4205083.77,      40.785514,       -0.322729,   92819.52,  147614.00,    3357.67,            12039.03,    181.14,  67153.34,           63906.79,   -726.88,    401.57,        1160.39,   None,   None
+  2,     Segorbe 63,       0,  0.231109, 2460933.675951655023, 192.71454,  86.83358,                2.80179,  37.47080,         2.47832,       37.67378,    192.71454,     +86.83358,     193.70874,      +87.15642,  2643405.08,  4131635.53,  4202581.63,      40.778011,       -0.338885,   89968.54,  145109.73,    6629.76,            15311.13,    154.71,  65441.86,           63906.79,   -724.83,    400.61,        1177.20,   None,   None
+  3,     Segorbe 63,       0,  0.281109, 2460933.675952233840, 205.77592,  86.63700,                2.19918,  36.87207,         1.87191,       37.07642,    205.77592,     +86.63700,     208.07835,      +86.94287,  2643659.92,  4129764.29,  4200340.58,      40.771284,       -0.353386,   87415.36,  142893.36,    9560.43,            18241.80,   -213.14,  58613.49,           63906.79,   -724.27,    400.45,        1194.64,   None,   None
+  4,     Segorbe 63,       0,  0.331109, 2460933.675952812657, 217.50703,  86.26376,                1.56987,  36.23332,         1.23887,       36.43899,    217.50703,     +86.26376,     220.58141,      +86.53992,  2643922.10,  4127839.12,  4198034.94,      40.764355,       -0.368308,   84788.94,  140640.74,   12575.57,            21256.93,   -496.53,  60302.64,           62707.80,   -723.29,    400.07,        1212.25,   None,   None
+  5,     Segorbe 63,       0,  0.381109, 2460933.675953391008, 227.24839,  85.73472,                0.91695,  35.55587,         0.58229,       35.76278,    227.24839,     +85.73472,     230.58072,      +85.97738,  2644189.99,  4125871.96,  4195679.00,      40.757268,       -0.383559,   82105.57,  138369.31,   15656.47,            24337.84,   -714.15,  61618.14,           62209.57,   -722.00,    399.51,        1230.07,   None,   None
+  0,    Zaragoza 93,       0,  0.143618, 2460933.675950654317,  78.43863,  -3.39550,              150.87993,  40.84942,       150.87993,       40.84942,     78.43863,      -3.39550,      78.43923,       -3.39550,  2642834.04,  4135828.09,  4207602.79,      40.793059,       -0.306532,   95690.14,  144474.55,       0.00,             8744.84,   -639.76,      0.00,           71121.96,      0.00,     -0.00,           0.00,   None,   None
+  1,    Zaragoza 93,       0,  0.193618, 2460933.675951233134,  78.08915,  -4.67277,              151.90758,  39.78217,       151.90652,       39.78158,     78.08915,      -4.67277,      78.09093,       -4.67303,  2643179.13,  4133294.52,  4204568.50,      40.783970,       -0.326068,   92232.39,  142277.07,    3967.98,            12712.82,     29.69,  79359.54,           71121.96,      2.46,     -0.44,           3.62,   None,   None
+  2,    Zaragoza 93,       0,  0.243618, 2460933.675951811951,  77.79279,  -5.75218,              152.75149,  38.87326,       152.75075,       38.87285,     77.79279,      -5.75218,      77.79449,       -5.75236,  2643462.73,  4131212.24,  4202074.69,      40.776490,       -0.342174,   89390.97,  140528.38,    7229.16,            15974.00,     -7.65,  65223.66,           71121.96,      1.70,     -0.31,           2.53,   None,   None
+  3,    Zaragoza 93,       0,  0.293618, 2460933.675952390302,  77.46173,  -6.95294,              153.66534,  37.85507,       153.66436,       37.85454,     77.46173,      -6.95294,      77.46387,       -6.95318,  2643770.34,  4128953.57,  4199369.63,      40.768367,       -0.359637,   86309.30,  138694.25,   10766.60,            19511.44,    231.26,  70748.79,           71121.96,      2.24,     -0.41,           3.39,   None,   None
+  4,    Zaragoza 93,       0,  0.343618, 2460933.675952969119,  77.17404,  -7.99132,              154.43554,  36.96886,       154.43543,       36.96880,     77.17404,      -7.99132,      77.17558,       -7.99135,  2644030.01,  4127046.85,  4197086.08,      40.761502,       -0.374421,   83708.18,  137197.19,   13752.82,            22497.66,    -81.04,  59724.46,           68608.53,      0.25,     -0.05,           0.38,   None,   None
+
+Notes
+-----
+- Points that have not been taken into consideration when computing the trajectory have '1' in the 'Ignore' column.
+- The time already has time offsets applied to it.
+- 'meas1' and 'meas2' are given input points.
+- X, Y, Z are ECI (Earth-Centered Inertial) positions of projected lines of sight on the radiant line.
+- Zc is the observed zenith distance of the entry angle, while the Zg is the entry zenith distance corrected for Earth's gravity.
+- Latitude (deg) and Longitude (deg) are in WGS84 coordinates, while Height (m) is in the EGM96 datum. There values are coordinates of each point on the radiant line.
+- Jacchia (1955) deceleration equation fit was done on the lag.
+- Right ascension and declination in the table are given in the epoch of date for the corresponding JD, per every point.
+- 'RA and Dec obs' are the right ascension and declination calculated from the observed values, while the 'RA and Dec line' are coordinates of the lines of sight projected on the fitted radiant line. The coordinates are in the epoch of date, and NOT J2000!. 'Azim and alt line' are thus corresponding azimuthal coordinates.
+- 'Vel prev avg' is the average velocity including all previous points up to the given point. For the first 4 points this velocity is computed as the average velocity of those 4 points. 
+
+
+Report generated by the Western Meteor Physics Library (WMPL) on 2025-09-15 16:08:45.115192 UTC
+WMPL version commit: 7aff8bfced03ff394a09ad37d429451fd15747e0
+WMPL version date: 2024-07-19 15:31:34

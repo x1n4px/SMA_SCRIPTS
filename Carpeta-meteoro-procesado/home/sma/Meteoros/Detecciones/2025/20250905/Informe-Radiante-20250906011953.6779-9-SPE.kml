@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+  <name>Informe-Radiante-20250906011953.6779-9.kml</name>
+  <open>1</open>
+  <Style id="sn_ylw-pushpin">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+  <Style id="sn_ylw-pushpin0">
+     <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+     </LineStyle>
+  </Style>
+	 <Style id="sn_ylw-pushpin">
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>2</width>
+		</LineStyle>
+	</Style>
+  <Placemark>
+    <name>I61.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.48410510298168,38.0277985889757,65770</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F61.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.68055630815964,38.0019832872511,40880</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T61.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-5.48410510298168,38.0277985889757,65770 -5.68055630815964,38.0019832872511,40880 			</coordinates>
+		</LineString>
+	</Placemark>
+  <Placemark>
+    <name>I64.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.44649742507569,38.0353964995657,69000</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F64.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.65242417460511,38.0084085196289,42880</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T64.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-5.44649742507569,38.0353964995657,69000 -5.65242417460511,38.0084085196289,42880 			</coordinates>
+		</LineString>
+	</Placemark>
+  <Placemark>
+    <name>I67.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.40891980776669,38.0429748001919,72240</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>F67.0</name>
+    <Point>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>-5.62430472676388,38.0148230333368,44890</coordinates>
+    </Point>
+  </Placemark>
+	<Placemark>
+		<name>T67.0</name>
+		<styleUrl>#sn_ylw-pushpin</styleUrl>
+		<LineString>
+			<extrude>1</extrude>
+			<tessellate>1</tessellate>
+                     <altitudeMode>absolute</altitudeMode>
+			<coordinates>				-5.40891980776669,38.0429748001919,72240 -5.62430472676388,38.0148230333368,44890 			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>

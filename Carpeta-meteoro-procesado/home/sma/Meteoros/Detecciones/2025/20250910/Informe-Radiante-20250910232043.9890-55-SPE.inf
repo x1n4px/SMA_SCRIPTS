@@ -1,0 +1,39 @@
+Informe del meteoro Datos-Z-20250910232043-55 captado desde observatorio 55:
+
+Comando para repetir:
+radiante.pl 2025-09-10T23:20:43.9890 55 840.9267 17.148405 850.57176 14.73714
+
+Lluvias activa a la fecha:
+Antihelio
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+ ANT1 |    0.00 |    1.00 |   49.131372 |  11.664074 |    49.891
+  SPE |   48.00 |   40.00 |   43.846202 |  39.454616 |     3.241
+  DSX |  135.00 |    0.00 |  242.790593 |  54.117485 |    79.684
+
+Se ha asociado a las Épsilon-perseidas de septiembre con velocidad (catálogo IMO) 64 Km/s.
+
+
+Trayectorias estimadas para un tiempo de 0.0999999046325684 segundos:
+ v    | Inicio                                       | Final                                        | Recor. 
+      | Lon          |  Lat        |   Alt  | dist.  | Lon          |  Lat        |  Alt   | dist.  | 
+============================================================================================================
+ 61.0 | 03:58:53.90 | 41:23:04.57 |  68.89 | 151.43 | 03:56:01.14 | 41:22:21.55 |  64.53 | 146.02 | 6.10
+ 64.0 | 04:03:32.69 | 41:22:38.89 |  72.34 | 158.88 | 04:00:31.68 | 41:21:53.87 |  67.77 | 153.20 | 6.40
+ 67.0 | 04:08:11.11 | 41:22:13.04 |  75.80 | 166.33 | 04:05:01.90 | 41:21:26.04 |  71.01 | 160.38 | 6.70
+
+Distancia angular recorrida por el meteoro (radianes / grados) 0.018878  / 1.081641
+Velocidad angular medida del meteoro (grad/sec): 10.816
+
+Velocidades angulares del meteoro previstas (grad/seg):
+(1) = Desde el radiante oficial de la lluvia
+(2) = Desde el radiante aparente
+  v  |  (1)   |  (2) 
+=======================
+61.0 | 10.544 | 10.485
+64.0 | 10.535 | 10.476
+67.0 | 10.526 | 10.466

@@ -1,0 +1,137 @@
+2025-09-18T23:36:25.4808
+Longitud/Latitud (geográficas) estación 20: 0.744033 42.017628
+Longitud/Latitud (geográficas) estación 55: 2.385500 41.519806
+Coordenadas rectangulares estación 20:
+xi: 4710.74439232938 eta: -579.374326531758 zeta: 4247.55149647418
+Coordenadas rectangulares estación 55:
+xi: 4761.6413965486 eta: -447.602980816688 zeta: 4205.9185065132
+Error cuadrático de ortogonalidad en la esfera celeste (en radianes): 1.84538278081915e-09
+
+Ajuste de puntos ZWO.
+Date-Obs X/Y Ar/De (grados) Ar/De (sexagesimal)
+2025-09-18T23:36:25.4808 1140.606 545.794 44.33987 16.81669 02:57:21.57 +16:49:00.08
+2025-09-18T23:36:25.5308 1143.230 542.528 44.78830 16.93553 02:59:09.19 +16:56:07.92
+2025-09-18T23:36:25.5808 1145.708 539.416 45.21485 17.04754 03:00:51.56 +17:02:51.13
+
+Ajuste trayectoria estación 55:
+Error cuadrático de ortogonalidad en la esfera celeste (en radianes): 4.30304418879747e-07
+
+Ajuste estación 55:
+X/Y Ar/De (grados) Ar/De (sexagesimal)
+Inicio: 364.045 628.186 322.08626 53.86263 21:28:20.70 +53:51:45.46
+Final:  324.038 633.162 315.25190 56.02022 21:01:00.46 +56:01:12.79
+
+Ángulo diedro entre planos trayectoria: 81.7756068599465
+Peso estadístico: 0.979536609180311
+
+Errores AR/DE radiante: 0.00012686934215603 5.84736993196183e-05
+Radiante: 00:46:23.04, 05:32:30.55, 11.59599 5.54182
+  (J2000) 00:45:03.29, 05:24:05.66, 11.26373 5.40157
+Azimut y distancia cenital del radiante geocéntrico en grados: 150.873179 39.895236
+
+Estación 20:
+   Inicio: 01:59:39.89 41:46:54.39 d:140.9469531599 h:89.7683527211648
+   Fin   : 01:58:52.46 41:48:01.13 d:137.862286801514 h:86.8727519151234
+
+Estación 55:
+   Inicio: 02:00:05.77 41:46:17.96 d:102.287174342471 h:91.3505271879867
+   Fin   : 01:58:15.84 41:48:52.63 d:98.6101280235464 h:84.6403614915071
+
+Impacto previsible:
+   Impacto: -358:25:29.77 42:21:57.04
+
+Ecuación paramétrica de la trayectoria:
+    a: 0.975010684202962 b: 0.20006990984639 c: 0.0965722365078543
+    xi00: 4807.23962389629 eta00: -485.077383067652 zeta00: 4288.32894542865 (inicio estación 20)
+    xi01: 4803.59437607745 eta01: -485.825379386358 zeta01: 4287.96789324718 (final  estación 20)
+    xi10: 4809.23094997819 eta10: -484.668767617447 zeta10: 4288.52618102459 (inicio estación 55)
+    xi11: 4800.78329336698 eta11: -486.402206977653 zeta11: 4287.68946291943 (final  estación 55)
+
+Distancia recorrida estación 20: 3.73867474264391 Error: 0.162929572304548
+Error alturas estación 20: 0.154004334300599
+Distancia recorrida estación 55: 8.66416824767139 Error: 0.295740554863949
+Error alturas estación 55: 0.29251017941088
+
+Trayectoria medida desde estación 20:
+H                        s (Km)  t (s) v (Km/s)    lambda         phi  (Est.20) Ar        De (Est.55) Ar            De         X        Y  '/píx.  píx./seg.
+============================================================================================================================================================
+2025-09-18T23:36:25.4808  0.000                 -358:00:20.11 41:46:54.39 02:57:21.57 16:49:00.08 21:22:20.47 54:23:24.68 354.837 629.404
+2025-09-18T23:36:25.5308  1.938 0.05000  38.757 -358:00:44.68 41:47:28.98 02:59:09.19 16:56:07.92 21:16:23.93 54:52:53.18 345.970 630.536 997.534 178.779
+2025-09-18T23:36:25.5808  1.801 0.05000  36.016 -358:01:07.54 41:48:01.13 03:00:51.56 17:02:51.13 21:10:39.38 55:19:41.64 337.618 631.566 153.277 168.305
+
+Tiempo estación 1: 0.1000
+
+Velocidad media  37.387 Km/s
+
+
+Tiempo trayectoria en estación 55 (segundos): 0.2317
+Distancia recorrida en estación 55 (Km): 8.66416824767139
+
+
+Trayectoria calculada por regresión desde estación 20:
+H                        t       s     v (Km/s)  v (píx/s
+-------------------------------------------------
+2025-09-18T23:36:25.4808 0.00000 -0.00000  40.128 354.837
+2025-09-18T23:36:25.5308 0.05000 01.93788  37.387 345.970
+2025-09-18T23:36:25.5808 0.10000 03.73867  34.645 337.618
+
+
+Ecuación del movimiento Km/s (e=at^2 + bt + c):
+a = -27.4137352269253
+b = 40.1280713886034 (velocidad inicial en Km/s) 
+c = -2.55449038675787e-15
+
+
+Ecuación del movimiento píx/s (e=At^2 + Bt + C):
+A = 102.99149469208
+B = -182.488917882843
+C = 354.837
+Error velocidad: 1.74876124798382
+
+Velocidad inicial estación 55: 37.2331422460846
+
+Aceleración en Km/s^2: -54.827
+Aceleración en g's    : -0.00559
+
+
+Lluvias activa a la fecha:
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+53.657100939574 SPE
+131.50971380774 DSX
+
+---------------- ELEMENTOS ORBITALES ---------------
+                   Máximo / Mínimo
+Vel. inf. (Km/s): 40.026499841585 40.0262760811051
+Vel. Geo. (Km/s): 38.4310905670746 38.4308575174576
+Radiante geocéntrico (grados):
+Ar:               11.400274 11.336495
+De:               4.785365 4.776931
+i:                0.227789207382416 0.160613134933273
+p:                0.399768880780836 0.398113929329305
+a:                41.9269786922399 37.7620287475189
+e:                0.995221139215233 0.99471468019672
+q:                0.20036319429612 0.199584398351297
+T:                -206.246263959139 -245.677817730384
+Omega:            355.816818465688 355.816818465688
+omega:            127.372289162708 127.230834317776
+
+Elemento / Valor / Error
+Vi: 40.03 1.74876124798382 
+Vg: 38.43 0.000116524808504437
+ar: 11.37 0.0318895000000001
+de: 4.78 0.00421699999999969
+i: 0.19 0.0335880362245712
+p: 0.40 0.000827475725765525
+a: 39.84 2.08247497236053
+e: 0.99 0.000253229509256436
+q: 0.20 0.000389397972411443
+T: -225.96 19.7157768856229
+omega: 127.30 0.0707274224662626
+Omega: grados / votos
+       355.816818 8
+       355.816818 0
+
+Método utilizado: 3

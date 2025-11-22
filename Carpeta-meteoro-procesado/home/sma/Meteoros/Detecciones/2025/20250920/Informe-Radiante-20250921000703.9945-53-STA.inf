@@ -1,0 +1,39 @@
+Informe del meteoro Datos-Z-20250921000703-53 captado desde observatorio 53:
+
+Comando para repetir:
+radiante.pl 2025-09-21T00:07:03.9945 53 906 362 929.61111 310.02778
+
+Lluvias activa a la fecha:
+Épsilon-perseidas de septiembre
+Sextántidas diurnas
+Táuridas Sur
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+Lluvia| Ar/De a la fecha  | Ar/de más cercano tray.  | Distancia
+================================================================
+  SPE |   60.20 |   41.20 |   46.464415 |  50.490977 |    13.297
+  DSX |  146.00 |    0.00 |  184.175082 |  22.165753 |    43.279
+  STA |   18.60 |    5.20 |   17.024280 |   5.892723 |     1.715
+
+Se ha asociado a las Táuridas Sur con velocidad (catálogo IMO) 27 Km/s.
+
+
+Trayectorias estimadas para un tiempo de 0.5 segundos:
+ v    | Inicio                                       | Final                                        | Recor. 
+      | Lon          |  Lat        |   Alt  | dist.  | Lon          |  Lat        |  Alt   | dist.  | 
+============================================================================================================
+ 24.0 | -05:55:36.23 | 43:56:15.58 |  57.52 |  85.97 | -05:58:47.24 | 43:59:54.58 |  48.62 |  83.00 | 12.00
+ 27.0 | -05:52:07.72 | 43:59:42.24 |  64.73 |  96.71 | -05:55:42.06 | 44:03:48.81 |  54.73 |  93.37 | 13.50
+ 30.0 | -05:48:39.28 | 44:03:08.33 |  71.95 | 107.46 | -05:52:36.84 | 44:07:42.50 |  60.84 | 103.75 | 15.00
+
+Distancia angular recorrida por el meteoro (radianes / grados) 0.137761  / 7.893141
+Velocidad angular medida del meteoro (grad/sec): 15.786
+
+Velocidades angulares del meteoro previstas (grad/seg):
+(1) = Desde el radiante oficial de la lluvia
+(2) = Desde el radiante aparente
+  v  |  (1)   |  (2) 
+=======================
+24.0 | 15.613 | 15.612
+27.0 | 15.608 | 15.608
+30.0 | 15.602 | 15.602

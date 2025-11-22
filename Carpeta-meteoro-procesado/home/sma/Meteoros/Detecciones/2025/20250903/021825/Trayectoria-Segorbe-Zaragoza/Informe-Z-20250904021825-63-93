@@ -1,0 +1,103 @@
+2025-09-04T02:18:26.8584
+Longitud/Latitud (geográficas) estación 63: -0.396900 39.759000
+Longitud/Latitud (geográficas) estación 93: -0.927381 41.641700
+Coordenadas rectangulares estación 63:
+xi: 4678.16648129614 eta: 1491.14980286664 zeta: 4057.61919144973
+Coordenadas rectangulares estación 93:
+xi: 4561.50522185228 eta: 1407.57581593774 zeta: 4216.12770613213
+Error cuadrático de ortogonalidad en la esfera celeste (en radianes): 6.53133119407949e-07
+
+Ajuste de puntos ZWO.
+Date-Obs X/Y Ar/De (grados) Ar/De (sexagesimal)
+2025-09-04T02:18:26.8584 1097.100 556.682 292.98878 29.05763 19:31:57.31 +29:03:27.47
+2025-09-04T02:18:26.9084 1097.705 556.214 292.95841 28.95957 19:31:50.02 +28:57:34.47
+2025-09-04T02:18:26.9584 1098.642 555.485 292.91138 28.80735 19:31:38.73 +28:48:26.45
+
+Ajuste trayectoria estación 93:
+Error cuadrático de ortogonalidad en la esfera celeste (en radianes): 1.14556197281794e-06
+
+Ajuste estación 93:
+X/Y Ar/De (grados) Ar/De (sexagesimal)
+Inicio: 871.781 333.461 334.88478 -14.34971 22:19:32.35 -14:20:58.96
+Final:  876.365 328.210 334.99424 -15.50878 22:19:58.62 -15:30:31.60
+
+Ángulo diedro entre planos trayectoria: 51.1319409551512
+Peso estadístico: 0.606207217202715
+
+Errores AR/DE radiante: 0.000954447277625078 0.000834886784280969
+Radiante: 21:24:00.42, 67:59:05.42, 321.00174 67.98484
+  (J2000) 21:23:34.86, 67:52:25.49, 320.89525 67.87375
+Azimut y distancia cenital del radiante geocéntrico en grados: 331.594384 41.483010
+
+Estación 63:
+   Inicio: -02:33:51.72 40:21:15.34 d:214.346101195648 h:81.9826606556553
+   Fin   : -02:33:33.41 40:20:49.26 d:213.287762395446 h:80.8867713006694
+
+Estación 93:
+   Inicio: -02:34:01.43 40:21:29.17 d:216.663866746994 h:82.5639047978639
+   Fin   : -02:33:04.93 40:20:08.70 d:216.165253928928 h:79.1830105120216
+
+Impacto previsible:
+   Impacto: -02:10:50.22 39:48:09.73
+
+Ecuación paramétrica de la trayectoria:
+    a: 0.291321818046068 b: -0.235893146561906 c: 0.927084689624123
+    xi00: 4751.34269953311 eta00: 1318.66350455106 zeta00: 4161.7247584272 (inicio estación 63)
+    xi01: 4750.92494396096 eta01: 1319.00177539211 zeta01: 4160.39531871156 (final  estación 63)
+    xi10: 4751.56425064754 eta10: 1318.48410710717 zeta10: 4162.42980910805 (inicio estación 93)
+    xi11: 4750.2753659599 eta11: 1319.52776070841 zeta11: 4158.32814151369 (final  estación 93)
+
+Distancia recorrida estación 63: 1.43400029201403 Error: 0.182716046615204
+Error alturas estación 63: 0.134969610211272
+Distancia recorrida estación 93: 4.42426419102851 Error: 0.270412697491401
+Error alturas estación 93: 0.25930764038272
+
+Trayectoria medida desde estación 63:
+H                        s (Km)  t (s) v (Km/s)    lambda         phi  (Est.63) Ar        De (Est.93) Ar            De         X        Y  '/píx.  píx./seg.
+============================================================================================================================================================
+2025-09-04T02:18:26.8584  0.000                 -02:33:51.72 40:21:15.34 19:31:57.31 29:03:27.47 22:19:36.84 -14:32:54.83 872.571 332.565
+2025-09-04T02:18:26.9084  0.564 0.05000  11.271 -02:33:44.52 40:21:05.09 19:31:50.02 28:57:34.47 22:19:40.17 -14:41:45.67 873.156 331.899 3728.464 17.729
+2025-09-04T02:18:26.9584  0.870 0.05000  17.409 -02:33:33.41 40:20:49.26 19:31:38.73 28:48:26.45 22:19:45.33 -14:55:26.27 874.060 330.870 573.074 27.394
+
+Tiempo estación 1: 0.1000
+
+Velocidad media  14.340 Km/s
+
+
+Tiempo trayectoria en estación 93 (segundos): 0.3085
+Distancia recorrida en estación 93 (Km): 4.42426419102851
+
+
+Trayectoria calculada por regresión desde estación 63:
+H                        t       s     v (Km/s)  v (píx/s
+-------------------------------------------------
+2025-09-04T02:18:26.8584 0.00000 -0.00000   8.201 872.571
+2025-09-04T02:18:26.9084 0.05000 00.56353  14.340 873.156
+2025-09-04T02:18:26.9584 0.10000 01.43400  20.479 874.060
+
+
+Ecuación del movimiento Km/s (e=at^2 + bt + c):
+a = 61.3868570426941
+b = 8.2013367458833 (velocidad inicial en Km/s) 
+c = -3.04113419560092e-17
+
+
+Ecuación del movimiento píx/s (e=At^2 + Bt + C):
+A = 63.8001216896052
+B = 8.51000811571216
+C = 872.571000000001
+Error velocidad: 1.04498990377691
+
+Velocidad inicial estación 93: 15.9374238309186
+
+Aceleración en Km/s^2: 122.774
+Aceleración en g's    : 0.01253
+
+
+Lluvias activa a la fecha:
+Antihelio
+Aurígidas
+
+Distancias mínimas (en grados) entre radiantes y trayectoria:
+72.9103363522355 ANT1
+67.7123938420316 AUR
