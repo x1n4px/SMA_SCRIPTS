@@ -1,2 +1,7 @@
 ./Carpeta-meteoro-procesado
 .db_ddl.sql
+
+# SQL
+*.sql
+sql/
+./sql
