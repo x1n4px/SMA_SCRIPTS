@@ -12,7 +12,7 @@ y es utilizado por todos los scripts del sistema.
 DB_CONFIG = {
     'host': 'localhost',        # Servidor de base de datos
     'database': 'astro',         # Nombre de la base de datos
-    'user': 'in4p',              # Usuario de MySQL
+    'user': 'root',              # Usuario de MySQL
     'password': '0000',          # Contraseña de MySQL
     'port': 3306,                # Puerto de MySQL (por defecto 3306)
     'charset': 'utf8mb4',        # Conjunto de caracteres
