@@ -25,8 +25,9 @@ from mysql.connector import Error
 
 try:
     from config_db import DB_CONFIG, CONNECTION_CONFIG, PATHS_CONFIG, TABLES, validate_config
-except ImportError:
-    print("❌ Error: No se pudo importar config_db.py")
+    from directory_readonly_guard import ProtectedDirectoryWriteError, enforce_read_only_directory
+except ImportError as exc:
+    print(f"❌ Error de importación: {exc}")
     sys.exit(1)
 
 
@@ -389,56 +390,80 @@ def main() -> int:
     logger.info("Ruta base: %s", base_path)
 
     try:
-        all_detections = scan_detection_directories(base_path, logger)
+        with enforce_read_only_directory(
+            base_path,
+            on_integrity_ok=lambda before, after: logger.info(
+                "Integridad solo lectura verificada OK | antes=%s/%s | despues=%s/%s",
+                before.digest[:12],
+                before.entries,
+                after.digest[:12],
+                after.entries,
+            ),
+        ) as fingerprint:
+            logger.info(
+                "Proteccion solo lectura activada para %s (huella=%s, entradas=%s)",
+                base_path,
+                fingerprint.digest[:12],
+                fingerprint.entries,
+            )
+
+            try:
+                all_detections = scan_detection_directories(base_path, logger)
+            except Exception as exc:
+                logger.error("No se pudo escanear la ruta base: %s", exc)
+                return 1
+
+            logger.info("Directorios detectados en disco: %s", len(all_detections))
+            if not all_detections:
+                logger.info("No hay directorios para procesar")
+                return 0
+
+            last_dt = None
+            try:
+                conn = connect_mysql(logger)
+                try:
+                    if args.mode == "pending":
+                        last_dt = get_last_processed_datetime(conn, logger)
+                finally:
+                    if conn.is_connected():
+                        conn.close()
+            except Exception as exc:
+                logger.error("Error de base de datos: %s", exc)
+                return 1
+
+            selected = all_detections if args.mode == "all" else filter_pending(all_detections, last_dt)
+
+            if args.limit and args.limit > 0:
+                selected = selected[: args.limit]
+
+            if not selected:
+                logger.info("No hay directorios seleccionados para procesar")
+                return 0
+
+            print_plan(logger, selected, args.mode, args.dry_run)
+            if not should_continue(args):
+                logger.info("Procesamiento cancelado por usuario")
+                return 0
+
+            summary = process_detections(
+                detections=selected,
+                timeout_seconds=args.timeout,
+                dry_run=args.dry_run,
+                logger=logger,
+            )
+            print_summary(logger, summary)
+
+            total_errors = summary["z"]["error"] + summary["rad"]["error"] + summary["fot"]["error"]
+            total_timeouts = summary["z"]["timeout"] + summary["rad"]["timeout"] + summary["fot"]["timeout"]
+            if total_errors > 0 or total_timeouts > 0:
+                return 1
+            return 0
+    except ProtectedDirectoryWriteError as exc:
+        logger.critical("Proteccion solo lectura: %s", exc)
+        return 2
     except Exception as exc:
-        logger.error("No se pudo escanear la ruta base: %s", exc)
+        logger.error("Error inesperado: %s", exc)
         return 1
-
-    logger.info("Directorios detectados en disco: %s", len(all_detections))
-    if not all_detections:
-        logger.info("No hay directorios para procesar")
-        return 0
-
-    last_dt = None
-    try:
-        conn = connect_mysql(logger)
-        try:
-            if args.mode == "pending":
-                last_dt = get_last_processed_datetime(conn, logger)
-        finally:
-            if conn.is_connected():
-                conn.close()
-    except Exception as exc:
-        logger.error("Error de base de datos: %s", exc)
-        return 1
-
-    selected = all_detections if args.mode == "all" else filter_pending(all_detections, last_dt)
-
-    if args.limit and args.limit > 0:
-        selected = selected[: args.limit]
-
-    if not selected:
-        logger.info("No hay directorios seleccionados para procesar")
-        return 0
-
-    print_plan(logger, selected, args.mode, args.dry_run)
-    if not should_continue(args):
-        logger.info("Procesamiento cancelado por usuario")
-        return 0
-
-    summary = process_detections(
-        detections=selected,
-        timeout_seconds=args.timeout,
-        dry_run=args.dry_run,
-        logger=logger,
-    )
-    print_summary(logger, summary)
-
-    total_errors = summary["z"]["error"] + summary["rad"]["error"] + summary["fot"]["error"]
-    total_timeouts = summary["z"]["timeout"] + summary["rad"]["timeout"] + summary["fot"]["timeout"]
-    if total_errors > 0 or total_timeouts > 0:
-        return 1
-    return 0
 
 
 if __name__ == "__main__":
