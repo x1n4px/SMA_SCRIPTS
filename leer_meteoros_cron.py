@@ -25,7 +25,7 @@ import mysql.connector
 from mysql.connector import Error
 
 try:
-    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, PATHS_CONFIG, TABLES, validate_config
 except ImportError:
     print("ERROR: No se pudo importar config_db.py")
     sys.exit(1)
@@ -90,7 +90,10 @@ def configure_logger(verbose: bool, log_file: Path) -> logging.Logger:
 def resolve_base_path(user_path: Optional[str]) -> Path:
     if user_path:
         return Path(user_path).expanduser().resolve()
-    return (Path(__file__).resolve().parent / DEFAULT_RELATIVE_BASE).resolve()
+    configured_base = Path(PATHS_CONFIG.get("meteor_detections_base", str(DEFAULT_RELATIVE_BASE))).expanduser()
+    if configured_base.is_absolute():
+        return configured_base.resolve()
+    return (Path(__file__).resolve().parent / configured_base).resolve()
 
 
 def resolve_log_path(log_file: Optional[str], log_dir: Optional[str]) -> Path:

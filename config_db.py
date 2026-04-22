@@ -32,6 +32,15 @@ CONNECTION_CONFIG = {
 }
 
 # ===========================
+# CONFIGURACIÓN DE RUTAS
+# ===========================
+
+PATHS_CONFIG = {
+    # Ruta base de detecciones de meteoros. Puede ser absoluta o relativa al script llamador.
+    'meteor_detections_base': 'Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones',
+}
+
+# ===========================
 # CONFIGURACIÓN DE LOGGING
 # ===========================
 
