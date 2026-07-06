@@ -31,7 +31,7 @@ except ImportError as exc:
     sys.exit(1)
 
 
-DEFAULT_RELATIVE_BASE = Path("Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones")
+DEFAULT_RELATIVE_BASE = Path("Carpeta-meteoro-procesado/home/sma/Detecciones")
 LOADER_SCRIPTS = {
     "z": "CargaInformesZ.py",
     "rad": "CargaInformesRad.py",

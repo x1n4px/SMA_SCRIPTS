@@ -19,6 +19,34 @@ except ImportError:
     print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
     sys.exit(1)
 
+
+def normalize_trajectory_dir(ruta):
+    ruta_path = pathlib.Path(ruta).expanduser().resolve()
+    if ruta_path.name == "vm":
+        return ruta_path.parent
+    return ruta_path
+
+
+def event_datetime_from_route(ruta):
+    trajectory_dir = normalize_trajectory_dir(ruta)
+    event_dir = trajectory_dir.parent
+    fecha = f"{event_dir.parent.name[:4]}-{event_dir.parent.name[4:6]}-{event_dir.parent.name[6:8]}"
+    hora = f"{event_dir.name[:2]}:{event_dir.name[2:4]}:{event_dir.name[4:6]}.0000"
+    return fecha, hora
+
+
+def time_to_seconds(hora):
+    raw = str(hora).strip()
+    if " " in raw:
+        raw = raw.split(" ")[-1]
+    if "." not in raw:
+        raw = f"{raw}.0000"
+    parts = raw.split(":")
+    if len(parts) < 3:
+        raise ValueError(f"Formato de hora inválido: {hora}")
+    return Decimal(parts[0]) * Decimal("3600") + Decimal(parts[1]) * Decimal("60") + Decimal(parts[2])
+
+
 cnxn = None
 cursor = None
 
@@ -93,31 +121,32 @@ try:
                 print(ruta + "/" + informe)
 
             # Comprobamos si existe un meteoro en la base de datos a esta fecha y hora, en caso contrario, lo añadimos
-            cursor.execute("SELECT * FROM Meteoro WHERE Fecha = %s", (fecha,))
+            event_fecha, event_hora = event_datetime_from_route(ruta)
+            cursor.execute("SELECT Identificador, Fecha, Hora FROM Meteoro WHERE Fecha = %s", (event_fecha,))
             meteoros = cursor.fetchall()
             insertar = True
+            target_seconds = time_to_seconds(event_hora)
+            mejor_match = None
             for meteoro in meteoros:
-                if hora[:5] == meteoro[2][:5]:
-                    hora_sec = Decimal(hora[6:])
-                    meteoro_sec = Decimal(meteoro[2][6:])
-                    if meteoro_sec < hora_sec and meteoro_sec + Decimal('2') > hora_sec:
-                        idM = meteoro[0]
-                        insertar = False
-                    elif meteoro_sec == hora_sec:
-                        idM = meteoro[0]
-                        insertar = False
-                    elif meteoro_sec > hora_sec and meteoro_sec - Decimal('2') < hora_sec:
-                        idM = meteoro[0]
-                        insertar = False
+                try:
+                    delta = abs(time_to_seconds(meteoro[2]) - target_seconds)
+                except Exception:
+                    continue
+                if delta <= Decimal("3"):
+                    if mejor_match is None or delta < mejor_match[0] or (delta == mejor_match[0] and meteoro[0] < mejor_match[1]):
+                        mejor_match = (delta, meteoro[0])
+            if mejor_match is not None:
+                idM = mejor_match[1]
+                insertar = False
 
             if insertar:
                 cursor.execute("SELECT MAX(Identificador) FROM Meteoro")
                 resultado = cursor.fetchone()
                 idM = (resultado[0] + 1) if resultado[0] is not None else 1
                 insert = "INSERT INTO Meteoro (Identificador, Fecha, Hora) VALUES (%s, %s, %s)"
-                cursor.execute(insert, (idM, fecha, hora))
+                cursor.execute(insert, (idM, event_fecha, event_hora))
                 cnxn.commit()
-                print(f"Meteoro insertado: ID={idM}, Fecha={fecha}, Hora={hora}")
+                print(f"Meteoro insertado: ID={idM}, Fecha={event_fecha}, Hora={event_hora}")
 
             # Sacamos las estrellas visibles del catálogo Hipparcos
             aux = lineasarchivo[actual].split(':')

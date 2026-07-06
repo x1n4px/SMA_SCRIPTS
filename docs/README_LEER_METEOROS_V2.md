@@ -20,7 +20,7 @@ python3 leer_meteoros_v2.py
 
 Esto usa la ruta base por defecto:
 
-`Carpeta-meteoro-procesado/home/sma/Meteoros/Detecciones`
+`Carpeta-meteoro-procesado/home/sma/Detecciones`
 
 ## Modos principales
 

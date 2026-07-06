@@ -48,6 +48,34 @@ except ImportError:
     print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
     sys.exit(1)
 
+
+def normalize_trajectory_dir(ruta):
+    ruta_path = pathlib.Path(ruta).expanduser().resolve()
+    if ruta_path.name == "vm":
+        return ruta_path.parent
+    return ruta_path
+
+
+def event_datetime_from_route(ruta):
+    trajectory_dir = normalize_trajectory_dir(ruta)
+    event_dir = trajectory_dir.parent
+    fecha = f"{event_dir.parent.name[:4]}-{event_dir.parent.name[4:6]}-{event_dir.parent.name[6:8]}"
+    hora = f"{event_dir.name[:2]}:{event_dir.name[2:4]}:{event_dir.name[4:6]}.0000"
+    return fecha, hora, trajectory_dir
+
+
+def time_to_seconds(hora):
+    raw = str(hora).strip()
+    if " " in raw:
+        raw = raw.split(" ")[-1]
+    if "." not in raw:
+        raw = f"{raw}.0000"
+    parts = raw.split(":")
+    if len(parts) < 3:
+        raise ValueError(f"Formato de hora inválido: {hora}")
+    return Decimal(parts[0]) * Decimal("3600") + Decimal(parts[1]) * Decimal("60") + Decimal(parts[2])
+
+
 cnxn = None
 cursor = None
 
@@ -107,16 +135,19 @@ try:
                 # Actualizamos actual 
             actual = actual + 1
 
-            # Comprobamos si existe ya un informe en esta hora y dia
-            infNuevo = True
-            cursor.execute("SELECT IdInforme, Fecha, Hora FROM Informe_Z")
-            resultados = cursor.fetchall()  # Leer todos los resultados de una vez
-            for i in resultados:
-                if str(i[1]) == fecha and str(i[2]) == hora:
-                    infNuevo = False
-                    idInf = i[0]
+            event_fecha, event_hora, trajectory_dir = event_datetime_from_route(ruta)
 
-            if infNuevo:
+            # Comprobamos si ya existe un informe para esta trayectoria.
+            infNuevo = True
+            cursor.execute(
+                "SELECT IdInforme FROM Informe_Z WHERE Ruta_del_informe IN (%s, %s)",
+                (str(trajectory_dir), f"{trajectory_dir}/vm"),
+            )
+            resultado = cursor.fetchone()
+            if resultado:
+                infNuevo = False
+                idInf = resultado[0]
+            else:
                 if len(sys.argv) == 1:
                     print(ruta + "/" + informe)
                 cursor.execute("SELECT MAX(IdInforme) FROM Informe_Z")
@@ -665,35 +696,29 @@ try:
             metodo = "NULL"
 
         if infNuevo:
-            cursor.execute("SELECT * FROM Meteoro")
-            meteoros = cursor.fetchall()  # Leer todos los resultados de una vez
+            cursor.execute("SELECT Identificador, Fecha, Hora FROM Meteoro WHERE Fecha = %s", (event_fecha,))
+            meteoros = cursor.fetchall()
             insertar = True
-            update = False
+            target_seconds = time_to_seconds(event_hora)
+            mejor_match = None
             for i in meteoros:
-                fechaBien = str(i[1])  # MySQL ya devuelve el formato correcto YYYY-MM-DD
-                if fecha == fechaBien:
-                    if hora[:5] == str(i[2])[:5]:
-                        seg_db = Decimal(str(i[2])[6:])
-                        seg_hora = Decimal(hora[6:])
-                        if seg_db < seg_hora and seg_db + Decimal('2') > seg_hora:
-                            idM = i[0]
-                            insertar = False
-                        elif seg_db == seg_hora:
-                            idM = i[0]
-                            insertar = False
-                        elif seg_db > seg_hora and seg_db - Decimal('2') < seg_hora:
-                            idM = i[0]
-                            update_query = "UPDATE Meteoro SET Hora = %s, Fecha = %s WHERE Identificador = %s"
-                            cursor.execute(update_query, (hora, fecha, i[0]))
-                            update = True
-                            insertar = False
-            
+                try:
+                    delta = abs(time_to_seconds(i[2]) - target_seconds)
+                except Exception:
+                    continue
+                if delta <= Decimal("3"):
+                    if mejor_match is None or delta < mejor_match[0] or (delta == mejor_match[0] and i[0] < mejor_match[1]):
+                        mejor_match = (delta, i[0])
+            if mejor_match is not None:
+                idM = mejor_match[1]
+                insertar = False
+
             if insertar:
                 cursor.execute("SELECT MAX(Identificador) FROM Meteoro")
                 resultado = cursor.fetchone()
-                idM = (resultado[0] + 1) if resultado and resultado[0] else 1
+                idM = (resultado[0] + 1) if resultado and resultado[0] is not None else 1
                 insert = "INSERT INTO Meteoro (Identificador, Fecha, Hora) VALUES (%s, %s, %s)"
-                cursor.execute(insert, (idM, fecha, hora))
+                cursor.execute(insert, (idM, event_fecha, event_hora))
 
         if infNuevo:
             # Preparar valores para NULL de manera segura
@@ -758,7 +783,7 @@ try:
                                    dist_recorrida_est2_val, error_dist_est2_val, error_alturas_est2_val, 
                                    tiempo_est1_val, v_media_val, t_trayec_esta2_val, ecMovKMSentera, 
                                    ecMovPIXentera, error_velocidad_val, v_ini_est2_val, ace_kms_val, 
-                                   ace_gs_val, metodo_val, ruta, idEc, idM))
+                                   ace_gs_val, metodo_val, str(trajectory_dir), idEc, idM))
 
             for i in range(len(lluviasActivas)):
                 insert = "INSERT INTO Lluvia_activa (Distancia_mínima_entre_radianes_y_trayectoria, Lluvia_Identificador, Lluvia_Año, Informe_Z_IdInforme) VALUES (%s, %s, %s, %s)"
