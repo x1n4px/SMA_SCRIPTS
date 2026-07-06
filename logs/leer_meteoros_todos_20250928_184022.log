@@ -1,0 +1,15 @@
+2025-09-28 18:40:22,279 - INFO - ============================================================
+2025-09-28 18:40:22,279 - INFO - INICIO DE PROCESAMIENTO AUTOMATIZADO DE METEOROS
+2025-09-28 18:40:22,279 - INFO - Fecha y hora de ejecución: 2025-09-28 18:40:22
+2025-09-28 18:40:22,279 - INFO - ============================================================
+2025-09-28 18:40:22,299 - INFO - package: mysql.connector.plugins
+2025-09-28 18:40:22,299 - INFO - plugin_name: mysql_native_password
+2025-09-28 18:40:22,299 - INFO - AUTHENTICATION_PLUGIN_CLASS: MySQLNativePasswordAuthPlugin
+2025-09-28 18:40:22,300 - INFO - Conexión exitosa a MySQL
+2025-09-28 18:40:22,301 - INFO - Último registro encontrado: 2025-09-23 04:21:54.0963
+2025-09-28 18:40:22,306 - INFO - Análisis de directorios completado:
+2025-09-28 18:40:22,306 - INFO -   - Total de directorios: 34
+2025-09-28 18:40:22,306 - INFO -   - Directorios procesados: 34
+2025-09-28 18:40:22,306 - INFO -   - Directorios pendientes: 0
+2025-09-28 18:40:22,306 - INFO - No hay directorios pendientes de procesar
+2025-09-28 18:40:22,306 - INFO - Conexión a MySQL cerrada

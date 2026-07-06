@@ -1,0 +1,6 @@
+2026-04-07 16:24:54 | INFO | LOCK | Activado en /home/in4p/uma/SMA_SCRIPTS/logs/leer_meteoros_cron.lock
+2026-04-07 16:24:54 | INFO | SCAN | Directorios detectados en disco: 32
+2026-04-07 16:24:54 | INFO | BD | Conectando a MySQL (1/3)
+2026-04-07 16:24:54 | INFO | BD | Conexion OK
+2026-04-07 16:24:54 | INFO | BD | Ultimo registro Meteoro: 2026-01-01 04:21:53
+2026-04-07 16:24:54 | INFO | SELECCION | No hay directorios seleccionados para procesar

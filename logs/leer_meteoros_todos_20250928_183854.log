@@ -1,0 +1,51 @@
+2025-09-28 18:38:54,044 - INFO - ============================================================
+2025-09-28 18:38:54,044 - INFO - INICIO DE PROCESAMIENTO AUTOMATIZADO DE METEOROS
+2025-09-28 18:38:54,044 - INFO - Fecha y hora de ejecución: 2025-09-28 18:38:54
+2025-09-28 18:38:54,044 - INFO - ============================================================
+2025-09-28 18:38:54,066 - INFO - package: mysql.connector.plugins
+2025-09-28 18:38:54,066 - INFO - plugin_name: mysql_native_password
+2025-09-28 18:38:54,066 - INFO - AUTHENTICATION_PLUGIN_CLASS: MySQLNativePasswordAuthPlugin
+2025-09-28 18:38:54,067 - INFO - Conexión exitosa a MySQL
+2025-09-28 18:38:54,068 - INFO - Último registro encontrado: 2025-09-02 23:53:13.6938
+2025-09-28 18:38:54,075 - INFO - Análisis de directorios completado:
+2025-09-28 18:38:54,075 - INFO -   - Total de directorios: 34
+2025-09-28 18:38:54,075 - INFO -   - Directorios procesados: 9
+2025-09-28 18:38:54,075 - INFO -   - Directorios pendientes: 25
+2025-09-28 18:38:54,075 - INFO - Iniciando procesamiento de 25 directorio(s) pendiente(s)
+2025-09-28 18:38:54,075 - INFO - [1/25] Procesando: 2025-09-03 02:18:25
+2025-09-28 18:38:54,273 - INFO - [2/25] Procesando: 2025-09-04 04:15:03
+2025-09-28 18:38:56,934 - INFO - [3/25] Procesando: 2025-09-04 20:04:31
+2025-09-28 18:38:57,345 - INFO - [4/25] Procesando: 2025-09-05 01:19:53
+2025-09-28 18:38:57,726 - INFO - [5/25] Procesando: 2025-09-05 01:24:53
+2025-09-28 18:38:58,108 - INFO - [6/25] Procesando: 2025-09-05 03:17:51
+2025-09-28 18:38:58,495 - INFO - [7/25] Procesando: 2025-09-05 03:32:20
+2025-09-28 18:38:59,783 - INFO - [8/25] Procesando: 2025-09-05 04:27:12
+2025-09-28 18:38:59,996 - INFO - [9/25] Procesando: 2025-09-05 21:20:37
+2025-09-28 18:39:01,824 - INFO - [10/25] Procesando: 2025-09-09 00:22:00
+2025-09-28 18:39:02,209 - INFO - Progreso: 40.0%
+2025-09-28 18:39:02,209 - INFO - [11/25] Procesando: 2025-09-09 02:07:35
+2025-09-28 18:39:04,386 - INFO - [12/25] Procesando: 2025-09-10 02:53:49
+2025-09-28 18:39:04,585 - INFO - [13/25] Procesando: 2025-09-10 04:08:34
+2025-09-28 18:39:04,797 - INFO - [14/25] Procesando: 2025-09-11 02:51:12
+2025-09-28 18:39:05,555 - INFO - [15/25] Procesando: 2025-09-12 03:33:56
+2025-09-28 18:39:05,771 - INFO - [16/25] Procesando: 2025-09-14 04:13:21
+2025-09-28 18:39:06,917 - INFO - [17/25] Procesando: 2025-09-15 20:54:50
+2025-09-28 18:39:07,127 - INFO - [18/25] Procesando: 2025-09-15 22:31:52
+2025-09-28 18:39:07,571 - INFO - [19/25] Procesando: 2025-09-16 00:28:07
+2025-09-28 18:39:07,804 - INFO - [20/25] Procesando: 2025-09-16 00:49:38
+2025-09-28 18:39:08,204 - INFO - Progreso: 80.0%
+2025-09-28 18:39:08,205 - INFO - [21/25] Procesando: 2025-09-16 02:32:15
+2025-09-28 18:39:09,385 - INFO - [22/25] Procesando: 2025-09-18 03:56:27
+2025-09-28 18:39:09,797 - INFO - [23/25] Procesando: 2025-09-18 23:36:25
+2025-09-28 18:39:10,961 - INFO - [24/25] Procesando: 2025-09-21 22:18:12
+2025-09-28 18:39:11,170 - INFO - [25/25] Procesando: 2025-09-22 04:21:51
+2025-09-28 18:39:14,536 - INFO - ============================================================
+2025-09-28 18:39:14,536 - INFO - RESUMEN DEL PROCESAMIENTO
+2025-09-28 18:39:14,536 - INFO - ============================================================
+2025-09-28 18:39:14,536 - INFO - Informes-Z: Procesados=32, Errores=74
+2025-09-28 18:39:14,536 - INFO - Informes-Radiante: Procesados=0, Errores=0
+2025-09-28 18:39:14,536 - INFO - Informes-fotometria: Procesados=0, Errores=0
+2025-09-28 18:39:14,536 - INFO - TOTALES: Procesados=32, Errores=74
+2025-09-28 18:39:14,536 - INFO - Directorios procesados: 25
+2025-09-28 18:39:14,536 - WARNING - Procesamiento completado con errores
+2025-09-28 18:39:14,537 - INFO - Conexión a MySQL cerrada
