@@ -9,6 +9,7 @@ Se dejó en raíz solo lo operativo del flujo principal y se agrupó el resto po
 ```text
 SMA_SCRIPTS/
 ├── leer_meteoros_v2.py              # Orquestador principal (v2)
+├── reprocesar_meteoros_desde_fecha.py  # Reproceso por rango de fechas
 ├── CargaInformesZ.py                # Carga de Informe-Z
 ├── CargaInformesRad.py              # Carga de Informe-Radiante
 ├── CargaInformesFot_MySQL.py        # Carga de Informe-fotometria
@@ -77,6 +78,39 @@ python3 leer_meteoros_v2.py --dry-run --verbose
 ```bash
 python3 leer_meteoros_v2.py --cron --mode pending --log-file logs/leer_meteoros_v2.log
 ```
+
+## Reprocesar por rango de fechas
+
+El script `reprocesar_meteoros_desde_fecha.py` sirve para rehacer un intervalo cerrado de datos. Su funcionamiento es:
+
+1. Localiza los directorios de eventos dentro del rango de fechas indicado.
+2. Borra de MySQL los registros asociados a esos meteoros.
+3. Vuelve a ejecutar los cargadores de `Z`, `Radiante` y `Fotometría` solo para esos directorios.
+
+### Sintaxis
+
+```bash
+python3 reprocesar_meteoros_desde_fecha.py FECHA_INICIO FECHA_FIN [--sin-confirmacion] [--ruta-base RUTA] [--timeout SEGUNDOS]
+```
+
+### Formato de fechas
+
+- `YYYYMMDD`
+- `YYYY-MM-DD`
+
+### Opciones útiles
+
+- `--sin-confirmacion`: ejecuta el borrado y reproceso sin pedir confirmación interactiva.
+- `--ruta-base`: fuerza una ruta base distinta para buscar las detecciones.
+- `--timeout`: tiempo máximo por cada cargador, en segundos. Por defecto `30`.
+
+### Ejemplo de uso
+
+```bash
+python3 reprocesar_meteoros_desde_fecha.py 2025-01-17 2025-01-18 --sin-confirmacion
+```
+
+Ese comando elimina y reconstruye todo lo que esté entre el 17 y el 18 de enero de 2025, ambos incluidos.
 
 ## Documentación relacionada
 
