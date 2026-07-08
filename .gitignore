@@ -1,18 +1,18 @@
 ./Carpeta-meteoro-procesado
-.db_ddl.sql
+Carpeta-meteoro-procesado
+
 
 # SQL
+.db_ddl.sql
 *.sql
 sql/
 ./sql
 
 
-Carpeta-meteoro-procesado
 .codex
-<<<<<<< HEAD
 crontab.sma
-=======
 
 __pycache__/
 *.pyc
->>>>>>> 6fe059a (añadir pycache al gitignore)
+
+log/
