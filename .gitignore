@@ -9,4 +9,10 @@ sql/
 
 Carpeta-meteoro-procesado
 .codex
+<<<<<<< HEAD
 crontab.sma
+=======
+
+__pycache__/
+*.pyc
+>>>>>>> 6fe059a (añadir pycache al gitignore)
