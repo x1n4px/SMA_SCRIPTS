@@ -18,11 +18,24 @@ from typing import List, Tuple, Optional
 # IMPORTAR CONFIGURACIÓN CENTRALIZADA
 # =============================================================================
 try:
-    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, PATHS_CONFIG, TABLES, validate_config, get_connection_string
 except ImportError:
     print("❌ Error: No se pudo importar config_db.py")
     print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
     sys.exit(1)
+
+
+def resolve_base_path(user_path: Optional[str]) -> Path:
+    """Resuelve la carpeta base de detecciones usando config_db por defecto."""
+    if user_path:
+        return Path(user_path).expanduser().resolve()
+
+    default_relative = Path(
+        PATHS_CONFIG.get("meteor_detections_base", "Carpeta-meteoro-procesado/home/sma/Detecciones")
+    ).expanduser()
+    if default_relative.is_absolute():
+        return default_relative.resolve()
+    return (Path(__file__).resolve().parent / default_relative).resolve()
 
 # =============================================================================
 # CLASE PRINCIPAL DEL PROCESADOR
@@ -67,7 +80,7 @@ class ProcesadorInformes:
         if self.cnxn:
             self.cnxn.close()
         print("✓ Conexión cerrada")
-    
+
     def verificar_informe_existe(self, tipo_informe: str, fecha: str, hora: str) -> bool:
         """
         Verifica si un informe ya existe en la base de datos
@@ -430,9 +443,11 @@ def configurar_base_datos():
 def main():
     """Función principal del programa"""
     procesador = ProcesadorInformes()
-    
-    # Directorio base por defecto
-    directorio_base = "Carpeta-meteoro-procesado"
+
+    directorio_base = resolve_base_path(sys.argv[1] if len(sys.argv) > 1 else None)
+    if not directorio_base.exists():
+        print(f"✗ El directorio base '{directorio_base}' no existe")
+        return
     
     while True:
         mostrar_menu_principal()
@@ -447,19 +462,6 @@ def main():
             continue
         
         elif opcion in ['1', '2', '3', '4']:
-            # Solicitar directorio si no se especificó por línea de comandos
-            if len(sys.argv) > 1:
-                directorio_base = sys.argv[1]
-            else:
-                dir_input = input(f"\n📁 Directorio base [{directorio_base}]: ").strip()
-                if dir_input:
-                    directorio_base = dir_input
-            
-            # Verificar que el directorio existe
-            if not os.path.exists(directorio_base):
-                print(f"✗ El directorio '{directorio_base}' no existe")
-                continue
-            
             # Conectar a la base de datos
             if not procesador.conectar_db():
                 continue

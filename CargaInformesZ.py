@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-import math
 import pathlib
+import re
 from decimal import Decimal, getcontext, InvalidOperation
 
 # Establecer precisión alta para manejar números muy pequeños
@@ -42,7 +42,7 @@ from mysql.connector import Error
 
 # Importar configuración centralizada
 try:
-    from config_db import DB_CONFIG, CONNECTION_CONFIG, TABLES, validate_config, get_connection_string
+    from config_db import DB_CONFIG, CONNECTION_CONFIG, PATHS_CONFIG, TABLES, validate_config, get_connection_string
 except ImportError:
     print("❌ Error: No se pudo importar config_db.py")
     print("🔧 Asegúrate de que el archivo config_db.py existe en el directorio actual")
@@ -79,6 +79,62 @@ def time_to_seconds(hora):
 cnxn = None
 cursor = None
 
+
+def normalizar_numero_observatorio(valor):
+    """
+    Extrae el número de observatorio desde un valor de texto o numérico.
+
+    Se acepta cualquier texto que contenga dígitos, por si el informe trae
+    caracteres invisibles, espacios o un formato ligeramente distinto.
+    """
+    texto = str(valor).replace("\ufeff", "").strip()
+    coincidencia = re.search(r"\d+", texto)
+    if not coincidencia:
+        return None
+    return int(coincidencia.group(0))
+
+
+def observatorio_existe(cursor, tabla_observatorio, numero_observatorio):
+    """
+    Comprueba si el observatorio existe, tolerando columnas numéricas o texto.
+    """
+    query = f"""
+        SELECT 1
+        FROM {tabla_observatorio}
+        WHERE CAST(Número AS UNSIGNED) = %s
+           OR TRIM(CAST(Número AS CHAR)) = %s
+        LIMIT 1
+    """
+    cursor.execute(query, (numero_observatorio, str(numero_observatorio)))
+    return cursor.fetchone() is not None
+
+
+def unir_pareja(valores):
+    """Une los dos primeros tokens de una secuencia en un texto simple."""
+    if not valores:
+        return None
+    if len(valores) == 1:
+        return str(valores[0])
+    return f"{valores[0]} {valores[1]}"
+
+
+def resolve_base_path(user_path=None):
+    """
+    Resuelve la ruta base de detecciones usando config_db como valor por defecto.
+
+    Si la ruta configurada es relativa, se interpreta respecto al directorio de
+    este script para evitar depender del directorio de ejecución.
+    """
+    if user_path:
+        return pathlib.Path(user_path).expanduser().resolve()
+
+    configured_base = pathlib.Path(
+        PATHS_CONFIG.get("meteor_detections_base", "Carpeta-meteoro-procesado/home/sma/Detecciones")
+    ).expanduser()
+    if configured_base.is_absolute():
+        return configured_base.resolve()
+    return (pathlib.Path(__file__).resolve().parent / configured_base).resolve()
+
 try:
     # Validar configuración
     config_valida, mensaje = validate_config()
@@ -92,6 +148,7 @@ try:
     
     cnxn = mysql.connector.connect(**config_con_autocommit)
     cursor = cnxn.cursor()
+    tabla_observatorio = TABLES.get('observatorio', 'Observatorio')
     ##########Conexion a la BD##############
 
     def recorrerSubdirectorio(ruta):
@@ -157,11 +214,13 @@ try:
             # Sacamos valores de la estación 1
             aux = lineasarchivo[actual][40:].split(":")
             estacion1 = []
-            num_estacion1 = aux[0].strip()
+            num_estacion1 = normalizar_numero_observatorio(aux[0])
+            if num_estacion1 is None:
+                print(f"ERROR: Observatorio NOT FOUND - valor inválido '{aux[0].strip()}'")
+                sys.exit(2)
             
             # Verificar que el observatorio existe
-            cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion1,))
-            if not cursor.fetchone():
+            if not observatorio_existe(cursor, tabla_observatorio, num_estacion1):
                 print(f"ERROR: Observatorio NOT FOUND - {num_estacion1}")
                 sys.exit(2)  # Código de salida 2 indica observatorio no encontrado
             
@@ -180,11 +239,13 @@ try:
             # Sacamos valores de la estación 2
             aux = lineasarchivo[actual+1][40:].split(":")
             estacion2 = []
-            num_estacion2 = aux[0].strip()
+            num_estacion2 = normalizar_numero_observatorio(aux[0])
+            if num_estacion2 is None:
+                print(f"ERROR: Observatorio NOT FOUND - valor inválido '{aux[0].strip()}'")
+                sys.exit(2)
             
             # Verificar que el observatorio existe
-            cursor.execute("SELECT Número FROM Observatorio WHERE Número = %s", (num_estacion2,))
-            if not cursor.fetchone():
+            if not observatorio_existe(cursor, tabla_observatorio, num_estacion2):
                 print(f"ERROR: Observatorio NOT FOUND - {num_estacion2}")
                 sys.exit(2)  # Código de salida 2 indica observatorio no encontrado
             
@@ -284,8 +345,8 @@ try:
 
         if actual < tamInforme:
             # Añadimos lo errores AR/DE radiante
-            erARDE = lineasarchivo[actual][24:].split(' ')
-            errorARDE = erARDE[0] + " " + erARDE[1]
+            erARDE = lineasarchivo[actual][24:].split()
+            errorARDE = " ".join(erARDE[:2]) if len(erARDE) >= 2 else "No medido"
                 # Actualizamos actual 
             actual = actual + 1
         else:
@@ -294,12 +355,15 @@ try:
         if actual < tamInforme:
             # Añadimos el radiante
             radiante = []
-            aux = lineasarchivo[actual].split(' ')
-            radiante.append(aux[1].strip(","))
-            radiante.append(aux[2].strip(","))
-            radiante.append(aux[3])
-            radiante.append(aux[4])
-            coordsRadiante = radiante[0] + " " + radiante[1] + " " + radiante[2] + " " + radiante[3]
+            aux = lineasarchivo[actual].split()
+            if len(aux) >= 5:
+                radiante.append(aux[1].strip(","))
+                radiante.append(aux[2].strip(","))
+                radiante.append(aux[3])
+                radiante.append(aux[4])
+                coordsRadiante = radiante[0] + " " + radiante[1] + " " + radiante[2] + " " + radiante[3]
+            else:
+                coordsRadiante = "No medido"
                 # Actualizamos actual 
             actual = actual + 1
         else:
@@ -308,12 +372,15 @@ try:
         if actual < tamInforme:
             # Añadimos J2000
             j2000 = []
-            aux = lineasarchivo[actual].split(' ')
-            j2000.append(aux[3].strip(","))
-            j2000.append(aux[4].strip(","))
-            j2000.append(aux[5])
-            j2000.append(aux[6])
-            coordsJ2000 = j2000[0] + " " + j2000[1] + " " + j2000[2] + " " + j2000[3]
+            aux = lineasarchivo[actual].split()
+            if len(aux) >= 5:
+                j2000.append(aux[1].strip(","))
+                j2000.append(aux[2].strip(","))
+                j2000.append(aux[3])
+                j2000.append(aux[4])
+                coordsJ2000 = j2000[0] + " " + j2000[1] + " " + j2000[2] + " " + j2000[3]
+            else:
+                coordsJ2000 = "No medido"
                 # Actualizamos actual 
             actual = actual + 1
         else: 
@@ -645,15 +712,15 @@ try:
 
         if actual < tamInforme:
             # Sacamos los elementos orbitales
-            velInf = lineasarchivo[actual][18:].split(' ')
-            velGeo = lineasarchivo[actual+1][18:].split(' ')
+            velInf = lineasarchivo[actual][18:].split()
+            velGeo = lineasarchivo[actual+1][18:].split()
                 # Actualizamos actual 
             actual = actual + 3
 
         if actual < tamInforme:
             radianteGeocentrico = [] # Ar, De, i, p, a, e, q, T, Omega (Para cada valor: Max, Min)
             for i in range(actual,actual+10):
-                radianteGeocentrico.append(lineasarchivo[i][18:].split(' '))
+                radianteGeocentrico.append(lineasarchivo[i][18:].split())
                 # Actualizamos actual 
             actual = actual + 12
         
@@ -662,7 +729,7 @@ try:
             # Añadimos los elementos orbitales
             elemOrb = [] # Vi, Vg, ar, de, i, p, a, e, q, T, omega Omega (Para cada valor: Valor, error)
             for i in range(0,11):
-                aux = lineasarchivo[actual+i].split(' ')
+                aux = lineasarchivo[actual+i].split()
                 elemO = []
                 elemO.append(aux[1])
                 elemO.append(aux[2])
@@ -670,23 +737,11 @@ try:
 
             #Añadimnos Omega por separado ya que tiene una disposición distinta
             Omega = [] # grados, votos
-            Omega.append(lineasarchivo[actual+12][7:].split(' '))
-            Omega.append(lineasarchivo[actual+13][7:].split(' '))
+            Omega.append(lineasarchivo[actual+12][7:].split())
+            Omega.append(lineasarchivo[actual+13][7:].split())
                 # Actualizamos actual 
             hayOrb = True
             actual = actual + 15
-
-            #Por petición de Alberto Castellón, el valor p de los elementos orbitales se modifica de forma que queda p = p*pi/180
-            pi_decimal = Decimal(str(math.pi))
-            p1 = (Decimal(radianteGeocentrico[3][0]) * pi_decimal) / Decimal('180')
-            p2 = (Decimal(radianteGeocentrico[3][1]) * pi_decimal) / Decimal('180')
-            p3 = (Decimal(elemOrb[5][0]) * pi_decimal) / Decimal('180')
-            p4 = (Decimal(elemOrb[5][1]) * pi_decimal) / Decimal('180')
-
-            radianteGeocentrico[3][0] = str(p1)
-            radianteGeocentrico[3][1] = str(p2)
-            elemOrb[5][0] = str(p3)
-            elemOrb[5][1] = str(p4)
             
 
         if actual < tamInforme:
@@ -855,40 +910,32 @@ try:
                 insert = """INSERT INTO Elementos_Orbitales (Informe_Z_IdInforme, Calculados_con, Vel__Inf, 
                            Vel__Geo, Ar, De, i, p, a, e, q, T, omega, Omega_grados_votos_max_min) 
                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                cursor.execute(insert, (idInf, calcCon, 
-                                       elemOrb[0][0] + " " + velInf[0] + " " + velInf[1] + " " + elemOrb[0][1],
-                                       elemOrb[1][0] + " " + velGeo[0] + " " + velGeo[1] + " " + elemOrb[1][1],
-                                       elemOrb[2][0] + " " + radianteGeocentrico[0][0] + " " + radianteGeocentrico[0][1] + " " + elemOrb[2][1],
-                                       elemOrb[3][0] + " " + radianteGeocentrico[1][0] + " " + radianteGeocentrico[1][1] + " " + elemOrb[3][1],
-                                       elemOrb[4][0] + " " + radianteGeocentrico[2][0] + " " + radianteGeocentrico[2][1] + " " + elemOrb[4][1],
-                                       elemOrb[5][0] + " " + radianteGeocentrico[3][0] + " " + radianteGeocentrico[3][1] + " " + elemOrb[5][1],
-                                       elemOrb[6][0] + " " + radianteGeocentrico[4][0] + " " + radianteGeocentrico[4][1] + " " + elemOrb[6][1],
-                                       elemOrb[7][0] + " " + radianteGeocentrico[5][0] + " " + radianteGeocentrico[5][1] + " " + elemOrb[7][1],
-                                       elemOrb[8][0] + " " + radianteGeocentrico[6][0] + " " + radianteGeocentrico[6][1] + " " + elemOrb[8][1],
-                                       elemOrb[9][0] + " " + radianteGeocentrico[7][0] + " " + radianteGeocentrico[7][1] + " " + elemOrb[9][1],
-                                       elemOrb[10][0] + " " + radianteGeocentrico[9][0] + " " + radianteGeocentrico[9][1] + " " + elemOrb[10][1],
-                                       "(" + Omega[0][0] + " " + Omega[0][1] + "), (" + Omega[1][0] + " " + Omega[1][1] + ") " + radianteGeocentrico[8][0] + " " + radianteGeocentrico[8][1]))
+                cursor.execute(insert, (idInf, calcCon,
+                                       unir_pareja(velInf),
+                                       unir_pareja(velGeo),
+                                       unir_pareja(radianteGeocentrico[0]),
+                                       unir_pareja(radianteGeocentrico[1]),
+                                       unir_pareja(radianteGeocentrico[2]),
+                                       unir_pareja(radianteGeocentrico[3]),
+                                       unir_pareja(radianteGeocentrico[4]),
+                                       unir_pareja(radianteGeocentrico[5]),
+                                       unir_pareja(radianteGeocentrico[6]),
+                                       unir_pareja(radianteGeocentrico[7]),
+                                       unir_pareja(radianteGeocentrico[9]),
+                                       f"{unir_pareja(Omega[0])} / {unir_pareja(Omega[1])}"))
 
 
-    if len(sys.argv) > 1:
-        directorio = sys.argv[1]
-        with os.scandir(directorio) as itr:
-                for entrada in itr:
-                    if entrada.is_dir():
-                        recorrerSubdirectorio(directorio + "/" + entrada.name)
-                    elif entrada.name[:9] == "Informe-Z" and entrada.name[-3:] != "kml":
-                        procesaInforme(directorio, entrada.name)
-    else:
-        directorio = input("Directorio raíz de los informes a cargar: ")
-        print("Se cargarán los informes contenidos en el directorio ("+directorio+") y sus subdirectorios")
-        sn = input("¿Continuar? (S/N): ")
-        if sn == "S":
-            with os.scandir(directorio) as itr:
-                for entrada in itr:
-                    if entrada.is_dir():
-                        recorrerSubdirectorio(directorio + "/" + entrada.name)
-                    elif entrada.name[:9] == "Informe-Z" and entrada.name[-3:] != "kml":
-                        procesaInforme(directorio, entrada.name)
+    directorio = resolve_base_path(sys.argv[1] if len(sys.argv) > 1 else None)
+    if not directorio.exists():
+        print(f"ERROR: El directorio base no existe: {directorio}")
+        sys.exit(1)
+
+    with os.scandir(directorio) as itr:
+        for entrada in itr:
+            if entrada.is_dir():
+                recorrerSubdirectorio(str(directorio / entrada.name))
+            elif entrada.name[:9] == "Informe-Z" and entrada.name[-3:] != "kml":
+                procesaInforme(str(directorio), entrada.name)
 
     if cursor:
         cursor.close()
